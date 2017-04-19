@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from __main__ import app
 
-db = SQLAlchemy()
+db = SQLAlchemy(app)
 
 
 class Ad(db.Model):
@@ -16,3 +17,6 @@ class Ad(db.Model):
     construction_year = db.Column(db.Integer, nullable=True)
     rooms_number = db.Column(db.Integer)
     premise_area = db.Column(db.Float)
+    new_building = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=True)
+

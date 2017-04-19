@@ -1,6 +1,9 @@
 from flask import Flask, render_template
 
 app = Flask(__name__)
+app.config.from_object('config')
+from ad_model import db, Ad
+db.create_all()
 
 @app.route('/')
 def ads_list():
