@@ -135,6 +135,21 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
       };
     },
 
+    componentDidMount: function(){
+        sendUrl = '/get_database_status';
+        $.ajax({
+          url: sendUrl,
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+              this.setState({path:data.path, update_datetime:data.update_datetime});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
+    },
+
     handlePassword: function(event){
         if(!this.state.editMode){
             var password = {'password': event.target.value};
@@ -160,16 +175,17 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
 
     render: function(){
         var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
+        var editMode = this.state.editMode;
         return(React.createElement("div", {className: "panel-body"}, 
             React.createElement("div", {className: "form-group"}, 
-                React.createElement("label", null, "База данных")
+                React.createElement("label", null, "База данных ", React.createElement("p", null, this.state.update_datetime))
             ), 
             React.createElement("div", {className: passError? "has-error" : "form-group"}, 
                 React.createElement("input", {name: "password", className: "form-control", type: "password", onChange: this.handlePassword, placeholder: "Пароль от базы", value: this.state.password}), 
                 passError ? React.createElement("span", {className: "has-error"}, "Некорректный пароль") : null
             ), 
             React.createElement("div", {className: "form-group"}, 
-                React.createElement("input", {className: "form-control", placeholder: "Путь к Json", value: this.state.path, onChange: this.handleAuthor})
+                React.createElement("input", {className: "form-control", disabled: !editMode, placeholder: "Путь к Json", value: this.state.path, onChange: this.handleAuthor})
             )
         ) )
     }

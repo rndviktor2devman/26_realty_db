@@ -29,6 +29,15 @@ def check_database_password():
         return forbidden_access()
 
 
+@app.route('/get_database_status', methods=['GET'])
+def get_database_status():
+    data = {
+        'path': config.default_db_source_path,
+        'update_datetime': 'default_datetime'
+    }
+    return jsonify(data)
+
+
 @app.route('/')
 def ads_list():
     return render_template('ads_list.html', ads=[{

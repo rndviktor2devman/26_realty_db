@@ -134,6 +134,21 @@ var DbSetupPanel = React.createClass({
       };
     },
 
+    componentDidMount: function(){
+        sendUrl = '/get_database_status';
+        $.ajax({
+          url: sendUrl,
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+              this.setState({path:data.path, update_datetime:data.update_datetime});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
+    },
+
     handlePassword: function(event){
         if(!this.state.editMode){
             var password = {'password': event.target.value};
@@ -159,16 +174,17 @@ var DbSetupPanel = React.createClass({
 
     render: function(){
         var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
+        var editMode = this.state.editMode;
         return(<div className="panel-body">
             <div className="form-group">
-                <label>База данных</label>
+                <label>База данных <p>{this.state.update_datetime}</p></label>
             </div>
             <div className={passError? "has-error" : "form-group"} >
                 <input name="password" className="form-control" type="password" onChange={this.handlePassword} placeholder="Пароль от базы" value={this.state.password}/>
                 {passError ? <span className="has-error">Некорректный пароль</span> : null}
             </div>
             <div className="form-group">
-                <input className="form-control"  placeholder="Путь к Json" value={this.state.path} onChange={this.handleAuthor}/>
+                <input className="form-control" disabled={!editMode} placeholder="Путь к Json" value={this.state.path} onChange={this.handleAuthor}/>
             </div>
         </div> )
     }
