@@ -1,9 +1,33 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
+import json
+import config
 
 app = Flask(__name__)
 app.config.from_object('config')
 from ad_model import db, Ad
 db.create_all()
+
+
+def forbidden_access():
+    message = {
+        'status': 403,
+        'message': 'Forbidden:' + request.url
+    }
+    return app.response_class(
+        response=json.dumps(message),
+        status=403,
+        mimetype='application/json'
+    )
+
+
+@app.route('/check_db_pass', methods=['POST'])
+def check_database_password():
+    password = request.json['password']
+    if password == config.password_for_update_db:
+        return jsonify()
+    else:
+        return forbidden_access()
+
 
 @app.route('/')
 def ads_list():

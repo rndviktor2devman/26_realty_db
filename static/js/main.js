@@ -123,14 +123,73 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
     }
 });
 
+var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
+    //init state
+    getInitialState: function(){
+      return {
+          password: '',
+          passwordError: false,
+          editMode: false,
+          path: '',
+          update_datetime: ''
+      };
+    },
+
+    handlePassword: function(event){
+        if(!this.state.editMode){
+            var password = {'password': event.target.value};
+            var sendUrl = '/check_db_pass';
+            $.ajax({
+              url: sendUrl,
+              type: 'POST',
+              data: JSON.stringify(password),
+              contentType: 'application/json;charset=UTF-8',
+              success: function(data) {
+                  this.setState({editMode: true, passwordError: false});
+              }.bind(this),
+              error: function(xhr, status, err) {
+                  if(xhr.status == 403){
+                      this.setState({editMode: false, passwordError: true});
+                  }
+              }.bind(this)
+            });
+
+            this.setState({password:password.password});
+        }
+    },
+
+    render: function(){
+        var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
+        return(React.createElement("div", {className: "panel-body"}, 
+            React.createElement("div", {className: "form-group"}, 
+                React.createElement("label", null, "База данных")
+            ), 
+            React.createElement("div", {className: passError? "has-error" : "form-group"}, 
+                React.createElement("input", {name: "password", className: "form-control", type: "password", onChange: this.handlePassword, placeholder: "Пароль от базы", value: this.state.password}), 
+                passError ? React.createElement("span", {className: "has-error"}, "Некорректный пароль") : null
+            ), 
+            React.createElement("div", {className: "form-group"}, 
+                React.createElement("input", {className: "form-control", placeholder: "Путь к Json", value: this.state.path, onChange: this.handleAuthor})
+            )
+        ) )
+    }
+});
+
 //ReactDOM.render(
 //    <ADList/>,
 //    document.getElementById('ads_panel')
 //);
 
+
+
 ReactDOM.render(
     React.createElement(SearchPanel, null),
     document.getElementById('search_panel')
+);
+
+ReactDOM.render(
+    React.createElement(DbSetupPanel, null),
+    document.getElementById('database_setup')
 );
 
 },{}]},{},[1]);

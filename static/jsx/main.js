@@ -122,12 +122,71 @@ var SearchPanel = React.createClass({
     }
 });
 
+var DbSetupPanel = React.createClass({
+    //init state
+    getInitialState: function(){
+      return {
+          password: '',
+          passwordError: false,
+          editMode: false,
+          path: '',
+          update_datetime: ''
+      };
+    },
+
+    handlePassword: function(event){
+        if(!this.state.editMode){
+            var password = {'password': event.target.value};
+            var sendUrl = '/check_db_pass';
+            $.ajax({
+              url: sendUrl,
+              type: 'POST',
+              data: JSON.stringify(password),
+              contentType: 'application/json;charset=UTF-8',
+              success: function(data) {
+                  this.setState({editMode: true, passwordError: false});
+              }.bind(this),
+              error: function(xhr, status, err) {
+                  if(xhr.status == 403){
+                      this.setState({editMode: false, passwordError: true});
+                  }
+              }.bind(this)
+            });
+
+            this.setState({password:password.password});
+        }
+    },
+
+    render: function(){
+        var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
+        return(<div className="panel-body">
+            <div className="form-group">
+                <label>База данных</label>
+            </div>
+            <div className={passError? "has-error" : "form-group"} >
+                <input name="password" className="form-control" type="password" onChange={this.handlePassword} placeholder="Пароль от базы" value={this.state.password}/>
+                {passError ? <span className="has-error">Некорректный пароль</span> : null}
+            </div>
+            <div className="form-group">
+                <input className="form-control"  placeholder="Путь к Json" value={this.state.path} onChange={this.handleAuthor}/>
+            </div>
+        </div> )
+    }
+});
+
 //ReactDOM.render(
 //    <ADList/>,
 //    document.getElementById('ads_panel')
 //);
 
+
+
 ReactDOM.render(
     <SearchPanel/>,
     document.getElementById('search_panel')
+);
+
+ReactDOM.render(
+    <DbSetupPanel/>,
+    document.getElementById('database_setup')
 );
