@@ -166,7 +166,7 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
                   this.setState({editMode: true, passwordError: false});
               }.bind(this),
               error: function(xhr, status, err) {
-                  if(xhr.status == 403){
+                  if(xhr.status == 400){
                       this.setState({editMode: false, passwordError: true});
                   }
               }.bind(this)
@@ -196,7 +196,7 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
               this.setState({update_message: data.update_message, update_datetime:data.update_datetime, update_error: false});
           }.bind(this),
           error: function(xhr, status, err) {
-              if(xhr.status == 403){
+              if(xhr.status == 400) {
                   this.setState({update_message: xhr.responseJSON.message, update_error: true});
               }
           }.bind(this)

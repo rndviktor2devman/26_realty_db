@@ -12,16 +12,16 @@ from ad_model import db, Ad
 db.create_all()
 
 
-def forbidden_access(error_text=None):
+def bad_request(error_text=None):
     if error_text is None:
-        error_text = 'Forbidden:' + request.url
+        error_text = 'Bad request:' + request.url
     message = {
-        'status': 403,
+        'status': 400,
         'message': error_text
     }
     return app.response_class(
         response=json.dumps(message),
-        status=403,
+        status=400,
         mimetype='application/json'
     )
 
@@ -44,7 +44,7 @@ def check_database_password():
     if password == config.password_for_update_db:
         return jsonify()
     else:
-        return forbidden_access()
+        return bad_request()
 
 
 @app.route('/get_database_status', methods=['GET'])
@@ -66,7 +66,7 @@ def update_database():
         }
         return jsonify(data)
     else:
-        return forbidden_access('some error happen')
+        return bad_request('password mismatch')
 
 
 @app.route('/')
