@@ -131,7 +131,8 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
           passwordError: false,
           editMode: false,
           path: '',
-          update_datetime: ''
+          update_datetime: '',
+          update_error: ''
       };
     },
 
@@ -173,8 +174,36 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
         }
     },
 
+    handlePath: function(event){
+        var newPath = event.target.value;
+        this.setState({path: newPath});
+    },
+
+    updateDatabase: function(){
+        var sendUrl = '/update_database';
+        var sendData = {
+            'password': this.state.password,
+            'path': this.state.path
+        };
+        $.ajax({
+          url: sendUrl,
+          type: 'POST',
+          data: JSON.stringify(sendData),
+          contentType: 'application/json;charset=UTF-8',
+          success: function(data) {
+              this.setState({update_datetime:data.update_datetime});
+          }.bind(this),
+          error: function(xhr, status, err) {
+              if(xhr.status == 403){
+                  this.setState({update_error: xhr.responseJSON.message});
+              }
+          }.bind(this)
+        });
+    },
+
     render: function(){
         var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
+        var updateError = this.state.update_error && this.state.update_error.length > 0;
         var editMode = this.state.editMode;
         return(React.createElement("div", {className: "panel-body"}, 
             React.createElement("div", {className: "form-group"}, 
@@ -185,7 +214,11 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
                 passError ? React.createElement("span", {className: "has-error"}, "Некорректный пароль") : null
             ), 
             React.createElement("div", {className: "form-group"}, 
-                React.createElement("input", {className: "form-control", disabled: !editMode, placeholder: "Путь к Json", value: this.state.path, onChange: this.handleAuthor})
+                React.createElement("input", {className: "form-control", disabled: !editMode, placeholder: "Путь к Json или Url", value: this.state.path, onChange: this.handlePath}), 
+                updateError ? React.createElement("span", null, this.state.update_error) : null
+            ), 
+            React.createElement("div", {className: "form-group"}, 
+                React.createElement("button", {type: "button", className: "btn btn-primary", disabled: !editMode, onClick: this.updateDatabase}, "Обновить")
             )
         ) )
     }

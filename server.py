@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, jsonify
+from datetime import datetime
 import json
 import config
+import re
+import requests
+import os
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -8,10 +12,12 @@ from ad_model import db, Ad
 db.create_all()
 
 
-def forbidden_access():
+def forbidden_access(error_text=None):
+    if error_text is None:
+        error_text = 'Forbidden:' + request.url
     message = {
         'status': 403,
-        'message': 'Forbidden:' + request.url
+        'message': error_text
     }
     return app.response_class(
         response=json.dumps(message),
@@ -20,9 +26,21 @@ def forbidden_access():
     )
 
 
+def parse_json_source(source_path):
+    if re.match(r'^http[s]?://', source_path):
+        http_answer = requests.get(source_path)
+        if http_answer.status_code == requests.codes.ok:
+            return http_answer.json()
+    elif os.path.isfile(source_path):
+        with open(source_path) as json_file:
+            return json.load(json_file)
+
+    return None
+
+
 @app.route('/check_db_pass', methods=['POST'])
 def check_database_password():
-    password = request.json['password']
+    password = request.json.get('password')
     if password == config.password_for_update_db:
         return jsonify()
     else:
@@ -36,6 +54,18 @@ def get_database_status():
         'update_datetime': 'default_datetime'
     }
     return jsonify(data)
+
+
+@app.route('/update_database', methods=['POST'])
+def update_database():
+    if request.json.get('password') == config.password_for_update_db:
+        #     json_ad = parse_json_source(request.json.get('path'))
+        data = {
+            'update_datetime': datetime.now()
+        }
+        return jsonify(data)
+    else:
+        return forbidden_access('some error happen')
 
 
 @app.route('/')
