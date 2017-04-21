@@ -12,12 +12,13 @@ from ad_model import db, Ad
 db.create_all()
 
 
-def bad_request(error_text=None):
+def bad_request(error_text=None, error_type=None):
     if error_text is None:
         error_text = 'Bad request:' + request.url
     message = {
         'status': 400,
-        'message': error_text
+        'message': error_text,
+        'error_type': error_type
     }
     return app.response_class(
         response=json.dumps(message),
@@ -64,9 +65,9 @@ def update_database():
             'update_message': 'update_succeed',
             'update_datetime': datetime.now()
         }
-        return jsonify(data)
+        return bad_request('something happen') # jsonify(data)
     else:
-        return bad_request('password mismatch')
+        return bad_request('password mismatch', error_type=1)
 
 
 @app.route('/')
