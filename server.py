@@ -61,6 +61,7 @@ def update_database():
     if request.json.get('password') == config.password_for_update_db:
         #     json_ad = parse_json_source(request.json.get('path'))
         data = {
+            'update_message': 'update_succeed',
             'update_datetime': datetime.now()
         }
         return jsonify(data)

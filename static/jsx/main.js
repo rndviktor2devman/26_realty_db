@@ -131,7 +131,9 @@ var DbSetupPanel = React.createClass({
           editMode: false,
           path: '',
           update_datetime: '',
-          update_error: ''
+
+          update_error: false,
+          update_message: ''
       };
     },
 
@@ -190,19 +192,25 @@ var DbSetupPanel = React.createClass({
           data: JSON.stringify(sendData),
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
-              this.setState({update_datetime:data.update_datetime});
+              this.setState({update_message: data.update_message, update_datetime:data.update_datetime, update_error: false});
           }.bind(this),
           error: function(xhr, status, err) {
               if(xhr.status == 403){
-                  this.setState({update_error: xhr.responseJSON.message});
+                  this.setState({update_message: xhr.responseJSON.message, update_error: true});
               }
           }.bind(this)
         });
     },
 
+    refreshPage: function(){
+        window.location.href = '/';
+    },
+
     render: function(){
         var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
-        var updateError = this.state.update_error && this.state.update_error.length > 0;
+        var updateError = this.state.update_error;
+        var updateMessage = this.state.update_message && this.state.update_message.length > 0;
+        var updateSucceed = updateMessage && !updateError;
         var editMode = this.state.editMode;
         return(<div className="panel-body">
             <div className="form-group">
@@ -210,15 +218,21 @@ var DbSetupPanel = React.createClass({
             </div>
             <div className={passError? "has-error" : "form-group"} >
                 <input name="password" className="form-control" type="password" onChange={this.handlePassword} placeholder="Пароль от базы" value={this.state.password}/>
-                {passError ? <span className="has-error">Некорректный пароль</span> : null}
+                {passError ? <span className="error-field">Некорректный пароль</span> : null}
+            </div>
+            <div className={updateError? "has-error" : "form-group"}>
+                <input className="form-control" disabled={!editMode} placeholder="Путь к Json-файлу или Url" value={this.state.path} onChange={this.handlePath}/>
+                {updateMessage ? <span className={updateError ? "error-field" : "success-field"}>{this.state.update_message}</span> : null}
             </div>
             <div className="form-group">
-                <input className="form-control" disabled={!editMode} placeholder="Путь к Json или Url" value={this.state.path} onChange={this.handlePath}/>
-                {updateError ? <span>{this.state.update_error}</span> : null}
+                <button type="button" className="btn btn-primary" disabled={!editMode} onClick={this.updateDatabase}>Обновить базу</button>
             </div>
-            <div className="form-group">
-                <button type="button" className="btn btn-primary" disabled={!editMode} onClick={this.updateDatabase}>Обновить</button>
-            </div>
+            {updateSucceed ?
+                <div className="form-group">
+                    <button type="button" className="btn btn-primary" onClick={this.refreshPage}>Работать с новой базой</button>
+                </div>
+                : null
+            }
         </div> )
     }
 });
