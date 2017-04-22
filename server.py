@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from sqlalchemy.sql.expression import func
 from datetime import datetime
 import json
 import config
@@ -79,9 +80,13 @@ def check_database_password():
 
 @app.route('/get_database_status', methods=['GET'])
 def get_database_status():
+    stored_date = db.session.query(Ad.update_date, func.max(Ad.update_date)).one()
+    last_update_time = 'not updated'
+    if stored_date.update_date is not None:
+        last_update_time = stored_date.update_date
     data = {
         'path': config.default_db_source_path,
-        'update_datetime': 'default_datetime'
+        'update_datetime': last_update_time
     }
     return jsonify(data)
 
