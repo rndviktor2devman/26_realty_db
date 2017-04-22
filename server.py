@@ -28,15 +28,44 @@ def bad_request(error_text=None, error_type=None):
 
 
 def parse_json_source(source_path):
+    json_data = None
+    source_error = None
     if re.match(r'^http[s]?://', source_path):
         http_answer = requests.get(source_path)
         if http_answer.status_code == requests.codes.ok:
-            return http_answer.json()
+            json_data = http_answer.json()
+        else:
+            source_error = 'no access to server'
     elif os.path.isfile(source_path):
         with open(source_path) as json_file:
-            return json.load(json_file)
+            json_data = json.load(json_file)
+        if json_data is None:
+            source_error = 'cannot parse json file'
+    else:
+        source_error = 'unrecognised source'
 
-    return None
+    return json_data, source_error
+
+
+def import_json_to_db(new_ads):
+    any_item_imported = False
+    datetime_import = datetime.now()
+    for ad in new_ads:
+        ad_item = Ad.query.filter_by(id=ad.get('id')).first()
+        if ad_item is None:
+            ad_item = Ad()
+        any_value_imported = False
+        for key, value in ad.items():
+            if hasattr(ad_item, key):
+                setattr(ad_item, key, value)
+                any_value_imported = True
+        if any_value_imported:
+            setattr(ad_item, 'update_date', datetime_import)
+            db.session.add(ad_item)
+            any_item_imported = True
+    if any_item_imported:
+        db.session.commit()
+    return any_item_imported, datetime_import
 
 
 @app.route('/check_db_pass', methods=['POST'])
@@ -60,12 +89,17 @@ def get_database_status():
 @app.route('/update_database', methods=['POST'])
 def update_database():
     if request.json.get('password') == config.password_for_update_db:
-        #     json_ad = parse_json_source(request.json.get('path'))
-        data = {
-            'update_message': 'update_succeed',
-            'update_datetime': datetime.now()
-        }
-        return bad_request('something happen') # jsonify(data)
+        json_ad, error = parse_json_source(request.json.get('path'))
+        if json_ad is not None:
+            success_import, date_import = import_json_to_db(json_ad)
+            if success_import:
+                data = {
+                    'update_message': 'update_succeed',
+                    'update_datetime': date_import
+                }
+                return jsonify(data)
+            else:
+                return bad_request('no data imported')
     else:
         return bad_request('password mismatch', error_type=1)
 

@@ -18,5 +18,5 @@ class Ad(db.Model):
     rooms_number = db.Column(db.Integer)
     premise_area = db.Column(db.Float)
     new_building = db.Column(db.Boolean, default=False)
-    active = db.Column(db.Boolean, default=True)
+    update_date = db.Column(db.DateTime)
 
