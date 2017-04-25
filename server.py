@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from sqlalchemy.sql.expression import func
 from datetime import datetime
+from sqlalchemy import or_, and_
+from collections import defaultdict
 import json
 import config
 import re
@@ -11,6 +13,8 @@ app = Flask(__name__)
 app.config.from_object('config')
 from ad_model import db, Ad
 db.create_all()
+
+update_date = None
 
 
 def bad_request(error_text=None, error_type=None):
@@ -58,6 +62,8 @@ def import_json_to_db(new_ads):
         any_value_imported = False
         for key, value in ad.items():
             if hasattr(ad_item, key):
+                if isinstance(value, str):
+                    value = ' '.join(value.split())
                 setattr(ad_item, key, value)
                 any_value_imported = True
         if any_value_imported:
@@ -84,6 +90,7 @@ def get_database_status():
     last_update_time = 'not updated'
     if stored_date.update_date is not None:
         last_update_time = stored_date.update_date
+        update_date = last_update_time
     data = {
         'path': config.default_db_source_path,
         'update_datetime': last_update_time
@@ -98,6 +105,7 @@ def update_database():
         if json_ad is not None:
             success_import, date_import = import_json_to_db(json_ad)
             if success_import:
+                update_date = date_import
                 data = {
                     'update_message': 'update_succeed',
                     'update_datetime': date_import
@@ -109,22 +117,70 @@ def update_database():
         return bad_request('password mismatch', error_type=1)
 
 
+def find_first_upper_char(str_name):
+    char = None
+    for word in list(str_name):
+        if word.isupper() and char is None:
+            char = word
+    return char
+
+
+@app.route('/get_district_list', methods=['GET'])
+def district_list():
+    records = db.session.query(Ad).group_by(Ad.settlement).all()
+    if records is not None:
+        dict_letters = defaultdict(list)
+        main_cities = list()
+
+        for rec in records:
+            dict_letters[find_first_upper_char(rec.settlement)].append({'name': rec.settlement, 'district': rec.oblast_district})
+            for main_city in config.MAIN_CITIES_LIST:
+                if main_city in rec.settlement:
+                    main_cities.append({'name': main_city, 'district': rec.oblast_district})
+
+        letters = list()
+        for k in sorted(dict_letters):
+            letters.append({'letter': k, 'array': dict_letters[k]})
+
+        district_data = {
+            'main_cities_map': main_cities,
+            'letters': letters
+        }
+
+        return jsonify(district_data)
+    else:
+        return jsonify()
+
+
+# @app.route('/get_ads', methods=['POST'])
+# def ads_data():
+#     page = 1 # request.json.get('page', 1, type=int)
+#     oblast_district = request.json.get('oblast_district')
+#     min_price = request.json.get('min_price', 0, type=int)
+#     max_price = request.json.get('max_price', 0, type=int)
+#     new_building = request.json.get('new_building', None)
+#     ads_filter_data = Ad.query.filter(Ad.update_date == update_date,
+#                          or_(oblast_district is None,
+#                              Ad.oblast_district == oblast_district),
+#                          or_(min_price == 0, Ad.price >= min_price),
+#                          or_(max_price == 0, Ad.price <= max_price),
+#                          or_(new_building is None,
+#                              or_(Ad.under_construction,
+#                                  and_(Ad.construction_year,
+#                                       datetime.now().year -
+#                                       Ad.construction_year <= 2)
+#                                  )
+#                              )
+#     )
+#     data = {
+#         'ads': ads_filter_data
+#     }
+#     return jsonify(data)
+
+
 @app.route('/')
 def ads_list():
-    return render_template('ads_list.html', ads=[{
-            "settlement": "Череповец",
-            "under_construction": False,
-            "description": '''Квартира в отличном состоянии. Заезжай и живи!''',
-            "price": 2080000,
-            "oblast_district": "Череповецкий район",
-            "living_area": 17.3,
-            "has_balcony": True,
-            "address": "Юбилейная",
-            "construction_year": 2001,
-            "rooms_number": 2,
-            "premise_area": 43.0,
-        }]*10
-    )
+    return render_template('ads_list.html')
 
 if __name__ == "__main__":
     app.run()

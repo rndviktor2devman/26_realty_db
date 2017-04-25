@@ -8,11 +8,55 @@ var ADList = React.createClass({displayName: "ADList",
     },
 
     componentDidMount: function(){
-
+        // var sendUrl = '/get_ads';
+        // $.ajax({
+        //   url: sendUrl,
+        //   type: 'POST',
+        //   data: JSON.stringify('some text'),
+        //   contentType: 'application/json;charset=UTF-8',
+        //   success: function(data) {
+        //       this.setState({ads: data.ads});
+        //   }.bind(this),
+        //   error: function(xhr, status, err) {
+        //     console.error(this.props.url, status, err.toString());
+        //   }.bind(this)
+        // });
     },
 
     render: function () {
-        return(React.createElement("div", null
+        var ads = this.state.ads;
+        return(React.createElement("div", null, 
+                ads.map(function(ad){
+                    return React.createElement("li", null, 
+                        React.createElement("div", {className: "panel-body"}, 
+                            React.createElement("div", {className: "row"}, 
+                              React.createElement("div", {className: "col-sm-12"}, 
+                                React.createElement("div", null, 
+                                  React.createElement("div", {className: "row"}, 
+                                    React.createElement("div", {className: "col-sm-7"}, 
+                                      React.createElement("p", null, React.createElement("strong", null, "Продается ",  ad.rooms_number, "-комнатная квартира"))
+                                    ), 
+                                    React.createElement("div", {className: "col-sm-5"}, 
+                                      React.createElement("p", {className: "text-right"}, React.createElement("strong", {class: "nowrap"},  ad.price, " р."))
+                                    )
+                                  ), 
+                                  React.createElement("div", {className: "row"}, 
+                                    React.createElement("div", {className: "col-sm-12"}, 
+                                      React.createElement("p", null,  ad.settlement, ", ",  ad.address)
+                                    )
+                                  )
+                                )
+                              ), 
+                              React.createElement("div", {className: "col-sm-12"}, 
+                                React.createElement("p", null, 
+                                  React.createElement("span", {className: "label label-success"}, "комнат: ",  ad.rooms_number), 
+                                  React.createElement("span", {className: "label label-primary"},  ad.premise_area, " кв.м.")
+                                )
+                              )
+                            )
+                          )
+                    )
+                })
 
             )
         )
@@ -23,7 +67,9 @@ var ADList = React.createClass({displayName: "ADList",
 var SearchPanel = React.createClass({displayName: "SearchPanel",
     //init state
     getInitialState: function(){
-        return{
+        return {
+            main_cities: [],
+            letters: [],
             priceFrom: null,
             priceTo: null,
             selectedCity: '',
@@ -32,67 +78,50 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
     },
 
     componentDidMount: function(){
-
+        sendUrl = '/get_district_list';
+        $.ajax({
+          url: sendUrl,
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+              if(data){
+                console.log(data);
+                this.setState({
+                    main_cities: data.main_cities_map,
+                    letters: data.letters
+                });
+              }
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
+        var main_cities = this.state.main_cities;
+        var letters = this.state.letters;
         return(React.createElement("div", {className: "panel-body"}, 
                   React.createElement("p", null, "город / районный центр"), 
                   React.createElement("div", {className: "form-group"}, 
                     React.createElement("select", {name: "oblast_district", className: "form-control"}, 
-                      React.createElement("option", {value: "Череповецкий район"}, "Череповец"), 
-                      React.createElement("option", {value: "Шекснинский район"}, "Шексна"), 
-                      React.createElement("option", {value: "Вологодский район"}, "Вологда"), 
-                      React.createElement("optgroup", {label: "Б"}, 
-                        React.createElement("option", {value: "Бабаевский район"}, "Бабаево"), 
-                        React.createElement("option", {value: "Бабушкинский район"}, "Село имени Бабушкина"), 
-                        React.createElement("option", {value: "Белозерский район"}, "Белозерск")
-                      ), 
-                      React.createElement("optgroup", {label: "В"}, 
-                        React.createElement("option", {value: "Великоустюгский район"}, "Великий Устюг"), 
-                        React.createElement("option", {value: "Верховажский район"}, "Верховажье"), 
-                        React.createElement("option", {value: "Вожегодский район"}, "Вожега"), 
-                        React.createElement("option", {value: "Вологодский район"}, "Вологда"), 
-                        React.createElement("option", {value: "Вытегорский район"}, "Вытегра")
-                      ), 
-                      React.createElement("optgroup", {label: "Г"}, 
-                        React.createElement("option", {value: "Грязовецкий район"}, "Грязовец")
-                      ), 
-                      React.createElement("optgroup", {label: "К"}, 
-                        React.createElement("option", {value: "Кадуйский район"}, "Кадуй"), 
-                        React.createElement("option", {value: "Кирилловский район"}, "Кириллов"), 
-                        React.createElement("option", {value: "Кичменгско-Городецкий район"}, "Кичменгский Городок")
-                      ), 
-                      React.createElement("optgroup", {label: "Л"}, 
-                        React.createElement("option", {value: "Вашкинский район"}, "Липин Бор")
-                      ), 
-                      React.createElement("optgroup", {label: "Н"}, 
-                        React.createElement("option", {value: "Никольский район"}, "Никольск"), 
-                        React.createElement("option", {value: "Нюксенский район"}, "Нюксеница")
-                      ), 
-                      React.createElement("optgroup", {label: "С"}, 
-                        React.createElement("option", {value: "Сокольский район"}, "Сокол"), 
-                        React.createElement("option", {value: "Сямженский район"}, "Сямжа")
-                      ), 
-                      React.createElement("optgroup", {label: "Т"}, 
-                        React.createElement("option", {value: "Тарногский район"}, "Тарногский Городок"), 
-                        React.createElement("option", {value: "Тотемский район"}, "Тотьма")
-                      ), 
-                      React.createElement("optgroup", {label: "У"}, 
-                        React.createElement("option", {value: "Усть-Кубинский район"}, "Устье"), 
-                        React.createElement("option", {value: "Устюженский район"}, "Устюжна")
-                      ), 
-                      React.createElement("optgroup", {label: "Х"}, 
-                        React.createElement("option", {value: "Харовский район"}, "Харовск")
-                      ), 
-                      React.createElement("optgroup", {label: "Ч"}, 
-                        React.createElement("option", {value: "Чагодощенский район"}, "Чагода"), 
-                        React.createElement("option", {value: "Череповецкий район"}, "Череповец")
-                      ), 
-                      React.createElement("optgroup", {label: "Ш"}, 
-                        React.createElement("option", {value: "Шекснинский район"}, "Шексна"), 
-                        React.createElement("option", {value: "Междуреченский район"}, "Шуйское")
-                      )
+                        
+                            main_cities.map(function(city){
+                                return React.createElement("option", {value: city.district}, city.name)
+                            }), 
+                        
+
+                        
+                            letters.map(function(letter) {
+                                return React.createElement("optgroup", {label: letter.letter}, 
+                                
+                                    letter.array.map(function (city) {
+                                        return React.createElement("option", {value: city.district}, city.name)
+                                    })
+                                
+                                )
+                            })
+                        
                     )
                   ), 
                   React.createElement("div", {className: "form-group "}, 
@@ -242,10 +271,10 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
     }
 });
 
-//ReactDOM.render(
-//    <ADList/>,
-//    document.getElementById('ads_panel')
-//);
+ReactDOM.render(
+   React.createElement(ADList, null),
+   document.getElementById('ads_list')
+);
 
 
 

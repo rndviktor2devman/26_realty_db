@@ -7,11 +7,55 @@ var ADList = React.createClass({
     },
 
     componentDidMount: function(){
-
+        // var sendUrl = '/get_ads';
+        // $.ajax({
+        //   url: sendUrl,
+        //   type: 'POST',
+        //   data: JSON.stringify('some text'),
+        //   contentType: 'application/json;charset=UTF-8',
+        //   success: function(data) {
+        //       this.setState({ads: data.ads});
+        //   }.bind(this),
+        //   error: function(xhr, status, err) {
+        //     console.error(this.props.url, status, err.toString());
+        //   }.bind(this)
+        // });
     },
 
     render: function () {
+        var ads = this.state.ads;
         return(<div>
+                {ads.map(function(ad){
+                    return <li>
+                        <div className="panel-body">
+                            <div className="row">
+                              <div className="col-sm-12">
+                                <div>
+                                  <div className="row">
+                                    <div className="col-sm-7">
+                                      <p><strong>Продается { ad.rooms_number }-комнатная квартира</strong></p>
+                                    </div>
+                                    <div className="col-sm-5">
+                                      <p className="text-right"><strong class="nowrap">{ ad.price } р.</strong></p>
+                                    </div>
+                                  </div>
+                                  <div className="row">
+                                    <div className="col-sm-12">
+                                      <p>{ ad.settlement }, { ad.address }</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-sm-12">
+                                <p>
+                                  <span className="label label-success">комнат: { ad.rooms_number }</span>
+                                  <span className="label label-primary">{ ad.premise_area } кв.м.</span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                    </li>
+                })}
 
             </div>
         )
@@ -22,7 +66,9 @@ var ADList = React.createClass({
 var SearchPanel = React.createClass({
     //init state
     getInitialState: function(){
-        return{
+        return {
+            main_cities: [],
+            letters: [],
             priceFrom: null,
             priceTo: null,
             selectedCity: '',
@@ -31,67 +77,50 @@ var SearchPanel = React.createClass({
     },
 
     componentDidMount: function(){
-
+        sendUrl = '/get_district_list';
+        $.ajax({
+          url: sendUrl,
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+              if(data){
+                console.log(data);
+                this.setState({
+                    main_cities: data.main_cities_map,
+                    letters: data.letters
+                });
+              }
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
+        var main_cities = this.state.main_cities;
+        var letters = this.state.letters;
         return(<div className="panel-body">
                   <p>город / районный центр</p>
                   <div className="form-group">
                     <select name="oblast_district" className="form-control">
-                      <option value="Череповецкий район">Череповец</option>
-                      <option value="Шекснинский район">Шексна</option>
-                      <option value="Вологодский район">Вологда</option>
-                      <optgroup label="Б">
-                        <option value="Бабаевский район">Бабаево</option>
-                        <option value="Бабушкинский район">Село имени Бабушкина</option>
-                        <option value="Белозерский район">Белозерск</option>
-                      </optgroup>
-                      <optgroup label="В">
-                        <option value="Великоустюгский район">Великий Устюг</option>
-                        <option value="Верховажский район">Верховажье</option>
-                        <option value="Вожегодский район">Вожега</option>
-                        <option value="Вологодский район">Вологда</option>
-                        <option value="Вытегорский район">Вытегра</option>
-                      </optgroup>
-                      <optgroup label="Г">
-                        <option value="Грязовецкий район">Грязовец</option>
-                      </optgroup>
-                      <optgroup label="К">
-                        <option value="Кадуйский район">Кадуй</option>
-                        <option value="Кирилловский район">Кириллов</option>
-                        <option value="Кичменгско-Городецкий район">Кичменгский Городок</option>
-                      </optgroup>
-                      <optgroup label="Л">
-                        <option value="Вашкинский район">Липин Бор</option>
-                      </optgroup>
-                      <optgroup label="Н">
-                        <option value="Никольский район">Никольск</option>
-                        <option value="Нюксенский район">Нюксеница</option>
-                      </optgroup>
-                      <optgroup label="С">
-                        <option value="Сокольский район">Сокол</option>
-                        <option value="Сямженский район">Сямжа</option>
-                      </optgroup>
-                      <optgroup label="Т">
-                        <option value="Тарногский район">Тарногский Городок</option>
-                        <option value="Тотемский район">Тотьма</option>
-                      </optgroup>
-                      <optgroup label="У">
-                        <option value="Усть-Кубинский район">Устье</option>
-                        <option value="Устюженский район">Устюжна</option>
-                      </optgroup>
-                      <optgroup label="Х">
-                        <option value="Харовский район">Харовск</option>
-                      </optgroup>
-                      <optgroup label="Ч">
-                        <option value="Чагодощенский район">Чагода</option>
-                        <option value="Череповецкий район">Череповец</option>
-                      </optgroup>
-                      <optgroup label="Ш">
-                        <option value="Шекснинский район">Шексна</option>
-                        <option value="Междуреченский район">Шуйское</option>
-                      </optgroup>
+                        {
+                            main_cities.map(function(city){
+                                return <option value={city.district}>{city.name}</option>
+                            })
+                        }
+
+                        {
+                            letters.map(function(letter) {
+                                return <optgroup label={letter.letter}>
+                                {
+                                    letter.array.map(function (city) {
+                                        return <option value={city.district}>{city.name}</option>
+                                    })
+                                }
+                                </optgroup>
+                            })
+                        }
                     </select>
                   </div>
                   <div className="form-group ">
@@ -241,10 +270,10 @@ var DbSetupPanel = React.createClass({
     }
 });
 
-//ReactDOM.render(
-//    <ADList/>,
-//    document.getElementById('ads_panel')
-//);
+ReactDOM.render(
+   <ADList/>,
+   document.getElementById('ads_list')
+);
 
 
 

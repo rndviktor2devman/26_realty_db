@@ -41,36 +41,7 @@
             </div>
             <div class="col-sm-8">
               <div class="panel panel-default">
-                {% for ad in ads %}
-                  <div class="panel-body">
-                    <div class="row">
-                      <div class="col-sm-12">
-                        <div>
-                          <div class="row">
-                            <div class="col-sm-7">
-                              <p><strong>Продается {{ ad.rooms_number }}-комнатная квартира</strong></p>
-                            </div>
-                            <div class="col-sm-5">
-                              <p class="text-right"><strong class="nowrap">{{ ad.price }} р.</strong></p>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-sm-12">
-                              <p>{{ ad.settlement }}, {{ ad.address }}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-sm-12">
-                        <p>
-                          <span class="label label-success">комнат: {{ ad.rooms_number }}</span>
-                          <span class="label label-primary">{{ ad.premise_area }} кв.м.</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <hr>
-                {% endfor %}
+                <div id="ads_list"></div>
                 <div class="panel-body">
                   <div class="clearfix">
                     <ul class="pagination pull-right">
