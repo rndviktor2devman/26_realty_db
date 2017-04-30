@@ -105,7 +105,6 @@ def update_database():
         if json_ad is not None:
             success_import, date_import = import_json_to_db(json_ad)
             if success_import:
-                update_date = date_import
                 data = {
                     'update_message': 'update_succeed',
                     'update_datetime': date_import
