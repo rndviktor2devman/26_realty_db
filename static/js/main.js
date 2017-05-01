@@ -182,9 +182,9 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
         });
     },
 
-    handlePassword: function(event){
-        if(!this.state.editMode){
-            var password = {'password': event.target.value};
+    handleInputKeyDown: function (event) {
+        if(event.keyCode === 13 && !this.state.editMode){
+            var password = {'password': this.state.password};
             var sendUrl = '/check_db_pass';
             $.ajax({
               url: sendUrl,
@@ -200,8 +200,12 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
                   }
               }.bind(this)
             });
+        }
+    },
 
-            this.setState({password:password.password});
+    handlePassword: function(event){
+        if(!this.state.editMode){
+            this.setState({password:event.target.value});
         }
     },
 
@@ -251,7 +255,7 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
                 React.createElement("label", null, "База данных ", React.createElement("p", null, this.state.update_datetime))
             ), 
             React.createElement("div", {className: passError? "has-error" : "form-group"}, 
-                React.createElement("input", {name: "password", className: "form-control", type: "password", onChange: this.handlePassword, placeholder: "Пароль от базы", value: this.state.password}), 
+                React.createElement("input", {name: "password", className: "form-control", type: "password", onChange: this.handlePassword, onKeyDown: this.handleInputKeyDown, placeholder: "Пароль от базы", value: this.state.password}), 
                 passError ? React.createElement("span", {className: "error-field"}, "Некорректный пароль") : null
             ), 
             React.createElement("div", {className: updateError? "has-error" : "form-group"}, 
