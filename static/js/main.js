@@ -275,21 +275,53 @@ var DbSetupPanel = React.createClass({displayName: "DbSetupPanel",
     }
 });
 
+var MainSitePanel = React.createClass({displayName: "MainSitePanel",
+    //init state
+    getInitialState: function(){
+      return {
+      };
+    },
+
+    render: function () {
+        return(React.createElement("div", null, 
+            React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "col-md-9"}, 
+                  React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {className: "col-sm-4"}, 
+                      React.createElement("form", {role: "form", className: "panel panel-default"}, 
+                        React.createElement(SearchPanel, null)
+                      ), 
+                      React.createElement("form", {role: "form", className: "panel panel-default"}, 
+                        React.createElement(DbSetupPanel, null)
+                      )
+                    ), 
+                    React.createElement("div", {className: "col-sm-8"}, 
+                      React.createElement("div", {className: "panel panel-default"}, 
+                        React.createElement(ADList, null), 
+                        React.createElement("div", {className: "panel-body"}, 
+                          React.createElement("div", {className: "clearfix"}, 
+                            React.createElement("ul", {className: "pagination pull-right"}, 
+                              React.createElement("li", {className: "disabled"}, React.createElement("span", null, "«")), 
+                              React.createElement("li", {className: "active"}, React.createElement("span", null, "1 ", React.createElement("span", {className: "sr-only"}, "(current)"))), 
+                              React.createElement("li", null, React.createElement("a", {href: "?page=2", role: "next"}, "2")), 
+                              React.createElement("li", null, React.createElement("a", {href: "?page=3", role: "next"}, "3")), 
+                              React.createElement("li", null, React.createElement("a", {href: "?page=4", role: "next"}, "4")), 
+                              React.createElement("li", null, React.createElement("a", {href: "?page=2", role: "next"}, "»"))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+        ));
+    }
+});
+
 ReactDOM.render(
-   React.createElement(ADList, null),
-   document.getElementById('ads_list')
-);
-
-
-
-ReactDOM.render(
-    React.createElement(SearchPanel, null),
-    document.getElementById('search_panel')
-);
-
-ReactDOM.render(
-    React.createElement(DbSetupPanel, null),
-    document.getElementById('database_setup')
+    React.createElement(MainSitePanel, null),
+    document.getElementById('main_site_panel')
 );
 
 },{}]},{},[1]);

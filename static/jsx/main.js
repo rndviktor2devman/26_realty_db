@@ -274,19 +274,51 @@ var DbSetupPanel = React.createClass({
     }
 });
 
+var MainSitePanel = React.createClass({
+    //init state
+    getInitialState: function(){
+      return {
+      };
+    },
+
+    render: function () {
+        return(<div>
+            <div className="row">
+                <div className="col-md-9">
+                  <div className="row">
+                    <div className="col-sm-4">
+                      <form role="form" className="panel panel-default">
+                        <SearchPanel/>
+                      </form>
+                      <form role="form" className="panel panel-default">
+                        <DbSetupPanel/>
+                      </form>
+                    </div>
+                    <div className="col-sm-8">
+                      <div className="panel panel-default">
+                        <ADList/>
+                        <div className="panel-body">
+                          <div className="clearfix">
+                            <ul className="pagination pull-right">
+                              <li className="disabled"><span>«</span></li>
+                              <li className="active"><span>1 <span className="sr-only">(current)</span></span></li>
+                              <li><a href="?page=2" role="next">2</a></li>
+                              <li><a href="?page=3" role="next">3</a></li>
+                              <li><a href="?page=4" role="next">4</a></li>
+                              <li><a href="?page=2" role="next">»</a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>);
+    }
+});
+
 ReactDOM.render(
-   <ADList/>,
-   document.getElementById('ads_list')
-);
-
-
-
-ReactDOM.render(
-    <SearchPanel/>,
-    document.getElementById('search_panel')
-);
-
-ReactDOM.render(
-    <DbSetupPanel/>,
-    document.getElementById('database_setup')
+    <MainSitePanel/>,
+    document.getElementById('main_site_panel')
 );

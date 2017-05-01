@@ -28,37 +28,7 @@
     </nav>
 
     <div class="container">
-      <div class="row">
-        <div class="col-md-9">
-          <div class="row">
-            <div class="col-sm-4">
-              <form role="form" class="panel panel-default">
-                <div id="search_panel"></div>
-              </form>
-              <form role="form" class="panel panel-default">
-                <div id="database_setup"></div>
-              </form>
-            </div>
-            <div class="col-sm-8">
-              <div class="panel panel-default">
-                <div id="ads_list"></div>
-                <div class="panel-body">
-                  <div class="clearfix">
-                    <ul class="pagination pull-right">
-                      <li class="disabled"><span>«</span></li>
-                      <li class="active"><span>1 <span class="sr-only">(current)</span></span></li>
-                      <li><a href="?page=2" role="next">2</a></li>
-                      <li><a href="?page=3" role="next">3</a></li>
-                      <li><a href="?page=4" role="next">4</a></li>
-                      <li><a href="?page=2" role="next">»</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="main_site_panel"></div>
     </div><!-- /.container -->
 
     <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
