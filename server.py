@@ -15,9 +15,6 @@ from ad_model import db, Ad
 db.create_all()
 
 
-COUNT_ITEMS_PER_PAGE = 10
-
-
 def bad_request(error_text=None, error_type=None):
     if error_text is None:
         error_text = 'Bad request:' + request.url
