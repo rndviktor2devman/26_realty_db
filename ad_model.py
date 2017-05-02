@@ -20,3 +20,6 @@ class Ad(db.Model):
     new_building = db.Column(db.Boolean, default=False)
     update_date = db.Column(db.DateTime)
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+

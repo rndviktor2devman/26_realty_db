@@ -4,60 +4,74 @@ var ADList = React.createClass({displayName: "ADList",
     getInitialState: function(){
         return{
             ads: [],
+            filter: null,
+            page: 1
         }
     },
 
+    setFilters: function (filter) {
+
+    },
+
     componentDidMount: function(){
-        // var sendUrl = '/get_ads';
-        // $.ajax({
-        //   url: sendUrl,
-        //   type: 'POST',
-        //   data: JSON.stringify('some text'),
-        //   contentType: 'application/json;charset=UTF-8',
-        //   success: function(data) {
-        //       this.setState({ads: data.ads});
-        //   }.bind(this),
-        //   error: function(xhr, status, err) {
-        //     console.error(this.props.url, status, err.toString());
-        //   }.bind(this)
-        // });
+        var sendUrl = '/get_ads';
+        var request_data = {
+            'filter': this.state.filter,
+            'page': this.state.page
+        };
+        $.ajax({
+          url: sendUrl,
+          type: 'POST',
+          data: JSON.stringify(request_data),
+          contentType: 'application/json;charset=UTF-8',
+          success: function(data) {
+              this.setState({ads: data.ads});
+              console.log(data.total);
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
         var ads = this.state.ads;
         return(React.createElement("div", null, 
-                ads.map(function(ad){
-                    return React.createElement("li", null, 
-                        React.createElement("div", {className: "panel-body"}, 
-                            React.createElement("div", {className: "row"}, 
-                              React.createElement("div", {className: "col-sm-12"}, 
-                                React.createElement("div", null, 
-                                  React.createElement("div", {className: "row"}, 
-                                    React.createElement("div", {className: "col-sm-7"}, 
-                                      React.createElement("p", null, React.createElement("strong", null, "Продается ",  ad.rooms_number, "-комнатная квартира"))
-                                    ), 
-                                    React.createElement("div", {className: "col-sm-5"}, 
-                                      React.createElement("p", {className: "text-right"}, React.createElement("strong", {class: "nowrap"},  ad.price, " р."))
+                 ads.length === 0? React.createElement("div", null, "Жилья не найдено, измените условия поиска или обновите базу"):
+                React.createElement("ul", {className: "list-unstyled"}, 
+                    ads.map(function(ad){
+                        return React.createElement("li", null, 
+                            React.createElement("div", {className: "panel-body"}, 
+                                React.createElement("div", {className: "row"}, 
+                                  React.createElement("div", {className: "col-sm-12"}, 
+                                    React.createElement("div", null, 
+                                      React.createElement("div", {className: "row"}, 
+                                        React.createElement("div", {className: "col-sm-7"}, 
+                                          React.createElement("p", null, React.createElement("strong", null, "Продается ",  ad.rooms_number, "-комнатная квартира"))
+                                        ), 
+                                        React.createElement("div", {className: "col-sm-5"}, 
+                                          React.createElement("p", {className: "text-right"}, React.createElement("strong", {class: "nowrap"},  ad.price, " р."))
+                                        )
+                                      ), 
+                                      React.createElement("div", {className: "row"}, 
+                                        React.createElement("div", {className: "col-sm-12"}, 
+                                          React.createElement("p", null,  ad.settlement, ", ",  ad.address)
+                                        )
+                                      )
                                     )
                                   ), 
-                                  React.createElement("div", {className: "row"}, 
-                                    React.createElement("div", {className: "col-sm-12"}, 
-                                      React.createElement("p", null,  ad.settlement, ", ",  ad.address)
+                                  React.createElement("div", {className: "col-sm-12"}, 
+                                    React.createElement("p", null, 
+                                      React.createElement("span", {className: "label label-success"}, "комнат: ",  ad.rooms_number), 
+                                      React.createElement("span", {className: "label label-primary"},  ad.premise_area, " кв.м.")
                                     )
                                   )
                                 )
-                              ), 
-                              React.createElement("div", {className: "col-sm-12"}, 
-                                React.createElement("p", null, 
-                                  React.createElement("span", {className: "label label-success"}, "комнат: ",  ad.rooms_number), 
-                                  React.createElement("span", {className: "label label-primary"},  ad.premise_area, " кв.м.")
-                                )
                               )
-                            )
-                          )
-                    )
-                })
-
+                        )
+                    })
+                )
+                
             )
         )
     }
@@ -297,19 +311,19 @@ var MainSitePanel = React.createClass({displayName: "MainSitePanel",
                     ), 
                     React.createElement("div", {className: "col-sm-8"}, 
                       React.createElement("div", {className: "panel panel-default"}, 
-                        React.createElement(ADList, null), 
-                        React.createElement("div", {className: "panel-body"}, 
-                          React.createElement("div", {className: "clearfix"}, 
-                            React.createElement("ul", {className: "pagination pull-right"}, 
-                              React.createElement("li", {className: "disabled"}, React.createElement("span", null, "«")), 
-                              React.createElement("li", {className: "active"}, React.createElement("span", null, "1 ", React.createElement("span", {className: "sr-only"}, "(current)"))), 
-                              React.createElement("li", null, React.createElement("a", {href: "?page=2", role: "next"}, "2")), 
-                              React.createElement("li", null, React.createElement("a", {href: "?page=3", role: "next"}, "3")), 
-                              React.createElement("li", null, React.createElement("a", {href: "?page=4", role: "next"}, "4")), 
-                              React.createElement("li", null, React.createElement("a", {href: "?page=2", role: "next"}, "»"))
-                            )
-                          )
-                        )
+                        React.createElement(ADList, null)
+                        /*<div className="panel-body">*/
+                          /*<div className="clearfix">*/
+                            /*<ul className="pagination pull-right">*/
+                              /*<li className="disabled"><span>«</span></li>*/
+                              /*<li className="active"><span>1 <span className="sr-only">(current)</span></span></li>*/
+                              /*<li><a href="?page=2" role="next">2</a></li>*/
+                              /*<li><a href="?page=3" role="next">3</a></li>*/
+                              /*<li><a href="?page=4" role="next">4</a></li>*/
+                              /*<li><a href="?page=2" role="next">»</a></li>*/
+                            /*</ul>*/
+                          /*</div>*/
+                        /*</div>*/
                       )
                     )
                   )

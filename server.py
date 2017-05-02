@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from sqlalchemy.sql.expression import func
 from datetime import datetime
 from sqlalchemy import or_, and_
@@ -14,7 +14,8 @@ app.config.from_object('config')
 from ad_model import db, Ad
 db.create_all()
 
-update_date = None
+
+COUNT_ITEMS_PER_PAGE = 10
 
 
 def bad_request(error_text=None, error_type=None):
@@ -54,7 +55,7 @@ def parse_json_source(source_path):
 
 def import_json_to_db(new_ads):
     any_item_imported = False
-    datetime_import = datetime.now()
+    datetime_import = datetime.now().replace(microsecond=0)
     for ad in new_ads:
         ad_item = Ad.query.filter_by(id=ad.get('id')).first()
         if ad_item is None:
@@ -71,6 +72,7 @@ def import_json_to_db(new_ads):
             db.session.add(ad_item)
             any_item_imported = True
     if any_item_imported:
+        session['update_date'] = datetime_import
         db.session.commit()
     return any_item_imported, datetime_import
 
@@ -90,7 +92,7 @@ def get_database_status():
     last_update_time = 'not updated'
     if stored_date.update_date is not None:
         last_update_time = stored_date.update_date
-        update_date = last_update_time
+        session['update_date'] = last_update_time
     data = {
         'path': config.default_db_source_path,
         'update_datetime': last_update_time
@@ -151,30 +153,44 @@ def district_list():
         return jsonify()
 
 
-# @app.route('/get_ads', methods=['POST'])
-# def ads_data():
-#     page = 1 # request.json.get('page', 1, type=int)
-#     oblast_district = request.json.get('oblast_district')
-#     min_price = request.json.get('min_price', 0, type=int)
-#     max_price = request.json.get('max_price', 0, type=int)
-#     new_building = request.json.get('new_building', None)
-#     ads_filter_data = Ad.query.filter(Ad.update_date == update_date,
-#                          or_(oblast_district is None,
-#                              Ad.oblast_district == oblast_district),
-#                          or_(min_price == 0, Ad.price >= min_price),
-#                          or_(max_price == 0, Ad.price <= max_price),
-#                          or_(new_building is None,
-#                              or_(Ad.under_construction,
-#                                  and_(Ad.construction_year,
-#                                       datetime.now().year -
-#                                       Ad.construction_year <= 2)
-#                                  )
-#                              )
-#     )
-#     data = {
-#         'ads': ads_filter_data
-#     }
-#     return jsonify(data)
+@app.route('/get_ads', methods=['POST'])
+def ads_data():
+    page = request.json.get('page', 1)
+    filter = request.json.get('filter')
+    oblast_district = "Череповецкий район"
+    min_price = 0
+    max_price = 0
+    new_building = None
+    if filter is not None:
+        oblast_district = filter.get('oblast_district')
+        min_price = filter.get('min_price', 0)
+        max_price = filter.get('max_price', 0)
+        new_building = filter.get('new_building', None)
+
+    update_date = session.pop('update_date', None)
+
+    ads_filter_data = Ad.query.filter(Ad.update_date == update_date,
+        or_(oblast_district is None,
+            Ad.oblast_district == oblast_district),
+        or_(min_price == 0, Ad.price >= min_price),
+        or_(max_price == 0, Ad.price <= max_price),
+        or_(new_building is None,
+            or_(Ad.under_construction,
+                and_(Ad.construction_year,
+                     datetime.now().year -
+                     Ad.construction_year <= app.config['MAX_NEW_BUILDING_AGE'])
+                )
+            )).paginate(page, app.config['COUNT_AD_PER_PAGE'], False)
+
+    ads = list()
+    for row in ads_filter_data.items:
+        ads.append(row.as_dict())
+
+    data = {
+        'ads': ads,
+        'total': ads_filter_data.total
+    }
+    return jsonify(data)
 
 
 @app.route('/')
@@ -182,4 +198,5 @@ def ads_list():
     return render_template('ads_list.html')
 
 if __name__ == "__main__":
+    app.secret_key = "some very secret key"
     app.run()

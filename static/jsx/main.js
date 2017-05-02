@@ -3,60 +3,74 @@ var ADList = React.createClass({
     getInitialState: function(){
         return{
             ads: [],
+            filter: null,
+            page: 1
         }
     },
 
+    setFilters: function (filter) {
+
+    },
+
     componentDidMount: function(){
-        // var sendUrl = '/get_ads';
-        // $.ajax({
-        //   url: sendUrl,
-        //   type: 'POST',
-        //   data: JSON.stringify('some text'),
-        //   contentType: 'application/json;charset=UTF-8',
-        //   success: function(data) {
-        //       this.setState({ads: data.ads});
-        //   }.bind(this),
-        //   error: function(xhr, status, err) {
-        //     console.error(this.props.url, status, err.toString());
-        //   }.bind(this)
-        // });
+        var sendUrl = '/get_ads';
+        var request_data = {
+            'filter': this.state.filter,
+            'page': this.state.page
+        };
+        $.ajax({
+          url: sendUrl,
+          type: 'POST',
+          data: JSON.stringify(request_data),
+          contentType: 'application/json;charset=UTF-8',
+          success: function(data) {
+              this.setState({ads: data.ads});
+              console.log(data.total);
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
         var ads = this.state.ads;
         return(<div>
-                {ads.map(function(ad){
-                    return <li>
-                        <div className="panel-body">
-                            <div className="row">
-                              <div className="col-sm-12">
-                                <div>
-                                  <div className="row">
-                                    <div className="col-sm-7">
-                                      <p><strong>Продается { ad.rooms_number }-комнатная квартира</strong></p>
-                                    </div>
-                                    <div className="col-sm-5">
-                                      <p className="text-right"><strong class="nowrap">{ ad.price } р.</strong></p>
+                { ads.length === 0? <div>Жилья не найдено, измените условия поиска или обновите базу</div>:
+                <ul className="list-unstyled">
+                    {ads.map(function(ad){
+                        return <li>
+                            <div className="panel-body">
+                                <div className="row">
+                                  <div className="col-sm-12">
+                                    <div>
+                                      <div className="row">
+                                        <div className="col-sm-7">
+                                          <p><strong>Продается { ad.rooms_number }-комнатная квартира</strong></p>
+                                        </div>
+                                        <div className="col-sm-5">
+                                          <p className="text-right"><strong class="nowrap">{ ad.price } р.</strong></p>
+                                        </div>
+                                      </div>
+                                      <div className="row">
+                                        <div className="col-sm-12">
+                                          <p>{ ad.settlement }, { ad.address }</p>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="row">
-                                    <div className="col-sm-12">
-                                      <p>{ ad.settlement }, { ad.address }</p>
-                                    </div>
+                                  <div className="col-sm-12">
+                                    <p>
+                                      <span className="label label-success">комнат: { ad.rooms_number }</span>
+                                      <span className="label label-primary">{ ad.premise_area } кв.м.</span>
+                                    </p>
                                   </div>
                                 </div>
                               </div>
-                              <div className="col-sm-12">
-                                <p>
-                                  <span className="label label-success">комнат: { ad.rooms_number }</span>
-                                  <span className="label label-primary">{ ad.premise_area } кв.м.</span>
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                    </li>
-                })}
-
+                        </li>
+                    })}
+                </ul>
+                }
             </div>
         )
     }
@@ -297,18 +311,18 @@ var MainSitePanel = React.createClass({
                     <div className="col-sm-8">
                       <div className="panel panel-default">
                         <ADList/>
-                        <div className="panel-body">
-                          <div className="clearfix">
-                            <ul className="pagination pull-right">
-                              <li className="disabled"><span>«</span></li>
-                              <li className="active"><span>1 <span className="sr-only">(current)</span></span></li>
-                              <li><a href="?page=2" role="next">2</a></li>
-                              <li><a href="?page=3" role="next">3</a></li>
-                              <li><a href="?page=4" role="next">4</a></li>
-                              <li><a href="?page=2" role="next">»</a></li>
-                            </ul>
-                          </div>
-                        </div>
+                        {/*<div className="panel-body">*/}
+                          {/*<div className="clearfix">*/}
+                            {/*<ul className="pagination pull-right">*/}
+                              {/*<li className="disabled"><span>«</span></li>*/}
+                              {/*<li className="active"><span>1 <span className="sr-only">(current)</span></span></li>*/}
+                              {/*<li><a href="?page=2" role="next">2</a></li>*/}
+                              {/*<li><a href="?page=3" role="next">3</a></li>*/}
+                              {/*<li><a href="?page=4" role="next">4</a></li>*/}
+                              {/*<li><a href="?page=2" role="next">»</a></li>*/}
+                            {/*</ul>*/}
+                          {/*</div>*/}
+                        {/*</div>*/}
                       </div>
                     </div>
                   </div>
