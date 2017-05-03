@@ -90,11 +90,11 @@ def get_database_status():
     if stored_date.update_date is not None:
         last_update_time = stored_date.update_date
         session['update_date'] = last_update_time
-    data = {
+    database_state = {
         'path': config.default_db_source_path,
         'update_datetime': last_update_time
     }
-    return jsonify(data)
+    return jsonify(database_state)
 
 
 @app.route('/update_database', methods=['POST'])
@@ -166,6 +166,7 @@ def ads_data():
 
     update_date = session.pop('update_date', None)
 
+    count_per_page = app.config['COUNT_AD_PER_PAGE']
     ads_filter_data = Ad.query.filter(Ad.update_date == update_date,
         or_(oblast_district is None,
             Ad.oblast_district == oblast_district),
@@ -177,17 +178,19 @@ def ads_data():
                      datetime.now().year -
                      Ad.construction_year <= app.config['MAX_NEW_BUILDING_AGE'])
                 )
-            )).paginate(page, app.config['COUNT_AD_PER_PAGE'], False)
+            )).paginate(page, count_per_page, False)
 
     ads = list()
     for row in ads_filter_data.items:
         ads.append(row.as_dict())
 
-    data = {
+    pages_count = ads_filter_data.total // count_per_page
+
+    search_results = {
         'ads': ads,
-        'total': ads_filter_data.total
+        'pages_count': pages_count
     }
-    return jsonify(data)
+    return jsonify(search_results)
 
 
 @app.route('/')

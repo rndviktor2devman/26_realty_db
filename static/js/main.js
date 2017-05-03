@@ -26,7 +26,7 @@ var ADList = React.createClass({displayName: "ADList",
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
               this.setState({ads: data.ads});
-              console.log(data.total);
+              console.log(data.pages_count);
           }.bind(this),
           error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
