@@ -160,7 +160,8 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
                         React.createElement("input", {type: "text", value: "", name: "max_price", className: "form-control js-price-format", placeholder: "любая"}), 
                       React.createElement("span", {className: "input-group-addon"}, "р.")
                     )
-                  )
+                  ), 
+                  React.createElement("button", {type: "submit", className: "btn btn-success"}, "Показать")
                 )
         )
     }

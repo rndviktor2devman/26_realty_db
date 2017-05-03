@@ -160,6 +160,7 @@ var SearchPanel = React.createClass({
                       <span className="input-group-addon">р.</span>
                     </div>
                   </div>
+                  <button type="submit" className="btn btn-success">Показать</button>
                 </div>
         )
     }
