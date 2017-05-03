@@ -10,7 +10,7 @@ var ADList = React.createClass({displayName: "ADList",
     },
 
     setFilters: function (filter) {
-
+        console.log('from AD list' + filter);
     },
 
     componentDidMount: function(){
@@ -84,10 +84,10 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
         return {
             main_cities: [],
             letters: [],
-            priceFrom: null,
-            priceTo: null,
-            selectedCity: '',
-            selectedNew: false
+            min_price: null,
+            max_price: null,
+            oblast_district: '',
+            new_building: true
         }
     },
 
@@ -99,7 +99,6 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
           cache: false,
           success: function(data) {
               if(data){
-                console.log(data);
                 this.setState({
                     main_cities: data.main_cities_map,
                     letters: data.letters
@@ -112,13 +111,57 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
         });
     },
 
+    hanldeSubmitFilter: function () {
+        var filter = {
+            'min_price': this.state.min_price,
+            'max_price': this.state.max_price,
+            'oblast_district': this.state.oblast_district,
+            'new_building': this.state.new_building
+        };
+        console.log(filter);
+    },
+
+    validateNumber: function (text) {
+        var newText = '';
+        var numbers = '0123456789';
+        for (var i=0; i < text.length; i++) {
+            if(numbers.indexOf(text[i]) > -1 ) {
+                 newText = newText + text[i];
+            }
+        }
+        return newText;
+    },
+
+    onChangedMin: function(event){
+        var text = event.target.value;
+        var newText = this.validateNumber(text);
+        this.setState({min_price: newText});
+    },
+
+    onChangedMax: function (event) {
+        var text = event.target.value;
+        var newText = this.validateNumber(text);
+        this.setState({max_price: newText});
+    },
+
+    handleNewBuilding: function (event) {
+        const target = event.target;
+        const value =  target.checked;
+        this.setState({ new_building: value});
+    },
+
+    handleCitySelection: function (event) {
+        var value = event.target.value;
+        this.setState({oblast_district: value});
+    },
+
     render: function () {
         var main_cities = this.state.main_cities;
         var letters = this.state.letters;
         return(React.createElement("div", {className: "panel-body"}, 
                   React.createElement("p", null, "город / районный центр"), 
                   React.createElement("div", {className: "form-group"}, 
-                    React.createElement("select", {name: "oblast_district", className: "form-control"}, 
+                    React.createElement("select", {name: "oblast_district", className: "form-control", onChange: this.handleCitySelection, value: this.state.oblast_district}, 
                         
                             main_cities.map(function(city){
                                 return React.createElement("option", {value: city.district}, city.name)
@@ -141,7 +184,7 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
                   React.createElement("div", {className: "form-group "}, 
                     React.createElement("div", {className: "checkbox"}, 
                       React.createElement("label", null, 
-                          React.createElement("input", {type: "checkbox", name: "new_building", value: "True"}), 
+                          React.createElement("input", {type: "checkbox", onChange: this.handleNewBuilding, checked: this.state.new_building}), 
                         "только новостройки"
                       )
                     )
@@ -150,18 +193,18 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
                   React.createElement("div", {className: "form-group "}, 
                     React.createElement("div", {className: "input-group"}, 
                       React.createElement("span", {className: "input-group-addon"}, "от"), 
-                        React.createElement("input", {type: "text", value: "", name: "min_price", className: "form-control js-price-format", placeholder: "любая"}), 
+                        React.createElement("input", {type: "text", value: this.state.min_price, onChange: this.onChangedMin, className: "form-control js-price-format", placeholder: "любая"}), 
                       React.createElement("span", {className: "input-group-addon"}, "р.")
                     )
                   ), 
                   React.createElement("div", {className: "form-group "}, 
                     React.createElement("div", {className: "input-group"}, 
                       React.createElement("span", {className: "input-group-addon"}, "до"), 
-                        React.createElement("input", {type: "text", value: "", name: "max_price", className: "form-control js-price-format", placeholder: "любая"}), 
+                        React.createElement("input", {type: "text", value: this.state.max_price, onChange: this.onChangedMax, className: "form-control js-price-format", placeholder: "любая"}), 
                       React.createElement("span", {className: "input-group-addon"}, "р.")
                     )
                   ), 
-                  React.createElement("button", {type: "submit", className: "btn btn-success"}, "Показать")
+                  React.createElement("button", {type: "button", className: "btn btn-success", onClick: this.hanldeSubmitFilter}, "Показать")
                 )
         )
     }
