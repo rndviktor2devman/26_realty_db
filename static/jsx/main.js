@@ -98,9 +98,11 @@ var SearchPanel = React.createClass({
           cache: false,
           success: function(data) {
               if(data){
+                  var default_district = (data.main_cities_map && data.main_cities_map.length > 0)? data.main_cities_map[0].district: data.letters[0].array[0].district;
                 this.setState({
                     main_cities: data.main_cities_map,
-                    letters: data.letters
+                    letters: data.letters,
+                    oblast_district: default_district
                 });
               }
           }.bind(this),
