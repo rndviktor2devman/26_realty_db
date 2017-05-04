@@ -1,43 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ADList = React.createClass({displayName: "ADList",
-    //init state
-    getInitialState: function(){
-        return{
-            ads: [],
-            filter: null,
-            page: 1
-        }
-    },
-
-    setFilters: function (filter) {
-        console.log('from AD list' + filter);
-    },
-
-    componentDidMount: function(){
-        var sendUrl = '/get_ads';
-        var request_data = {
-            'filter': this.state.filter,
-            'page': this.state.page
-        };
-        $.ajax({
-          url: sendUrl,
-          type: 'POST',
-          data: JSON.stringify(request_data),
-          contentType: 'application/json;charset=UTF-8',
-          success: function(data) {
-              this.setState({ads: data.ads});
-              console.log(data.pages_count);
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-    },
-
     render: function () {
-        var ads = this.state.ads;
+        var ads = this.props.ads;
         return(React.createElement("div", null, 
-                 ads.length === 0? React.createElement("div", null, "Жилья не найдено, измените условия поиска или обновите базу"):
+                 (!ads || ads.length == 0)? React.createElement("div", null, "Жилья не найдено, измените условия поиска или обновите базу"):
                 React.createElement("ul", {className: "list-unstyled"}, 
                     ads.map(function(ad){
                         return React.createElement("li", null, 
@@ -86,8 +52,8 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
             letters: [],
             min_price: null,
             max_price: null,
-            oblast_district: '',
-            new_building: true
+            settlement: '',
+            new_building: false
         }
     },
 
@@ -99,13 +65,13 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
           cache: false,
           success: function(data) {
               if(data){
-                  var default_district = (data.main_cities_map && data.main_cities_map.length > 0)?
+                  var default_settlement = (data.main_cities_map && data.main_cities_map.length > 0)?
                       data.main_cities_map[0].district
                       : (data.letters.length > 0? data.letters[0].array[0].district: "");
                 this.setState({
                     main_cities: data.main_cities_map,
                     letters: data.letters,
-                    oblast_district: default_district
+                    settlement: default_settlement
                 });
               }
           }.bind(this),
@@ -117,12 +83,13 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
 
     hanldeSubmitFilter: function () {
         var filter = {
-            'min_price': this.state.min_price,
-            'max_price': this.state.max_price,
-            'oblast_district': this.state.oblast_district,
+            'min_price': this.state.min_price? this.state.min_price : 0,
+            'max_price': this.state.max_price? this.state.max_price : 0,
+            'settlement': this.state.settlement,
             'new_building': this.state.new_building
         };
         console.log(filter);
+        this.props.callbackFilterChange(filter);
     },
 
     validateNumber: function (text) {
@@ -156,7 +123,7 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
 
     handleCitySelection: function (event) {
         var value = event.target.value;
-        this.setState({oblast_district: value});
+        this.setState({settlement: value});
     },
 
     render: function () {
@@ -165,7 +132,7 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
         return(React.createElement("div", {className: "panel-body"}, 
                   React.createElement("p", null, "город / районный центр"), 
                   React.createElement("div", {className: "form-group"}, 
-                    React.createElement("select", {name: "oblast_district", className: "form-control", onChange: this.handleCitySelection, value: this.state.oblast_district}, 
+                    React.createElement("select", {className: "form-control", onChange: this.handleCitySelection, value: this.state.settlement}, 
                         
                             main_cities.map(function(city){
                                 return React.createElement("option", {value: city.district}, city.name)
@@ -341,7 +308,33 @@ var MainSitePanel = React.createClass({displayName: "MainSitePanel",
     //init state
     getInitialState: function(){
       return {
-      };
+          ads: [],
+          pages: null,
+          selectedPage: 1
+      }
+    },
+
+    pushFilterState: function (filter) {
+        console.log('from parent' + filter);
+
+        var sendUrl = '/get_ads';
+        var request_data = {
+            'filter': filter,
+            'page': this.state.selectedPage
+        };
+        $.ajax({
+          url: sendUrl,
+          type: 'POST',
+          data: JSON.stringify(request_data),
+          contentType: 'application/json;charset=UTF-8',
+          success: function(data) {
+              this.setState({ads: data.ads});
+              console.log(data.pages_count);
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
@@ -351,7 +344,7 @@ var MainSitePanel = React.createClass({displayName: "MainSitePanel",
                   React.createElement("div", {className: "row"}, 
                     React.createElement("div", {className: "col-sm-4"}, 
                       React.createElement("form", {role: "form", className: "panel panel-default"}, 
-                        React.createElement(SearchPanel, null)
+                        React.createElement(SearchPanel, {callbackFilterChange: this.pushFilterState})
                       ), 
                       React.createElement("form", {role: "form", className: "panel panel-default"}, 
                         React.createElement(DbSetupPanel, null)
@@ -359,7 +352,7 @@ var MainSitePanel = React.createClass({displayName: "MainSitePanel",
                     ), 
                     React.createElement("div", {className: "col-sm-8"}, 
                       React.createElement("div", {className: "panel panel-default"}, 
-                        React.createElement(ADList, null)
+                        React.createElement(ADList, {ads: this.state.ads})
                         /*<div className="panel-body">*/
                           /*<div className="clearfix">*/
                             /*<ul className="pagination pull-right">*/

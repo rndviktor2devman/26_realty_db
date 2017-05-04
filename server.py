@@ -131,10 +131,10 @@ def district_list():
         main_cities = list()
 
         for rec in records:
-            dict_letters[find_first_upper_char(rec.settlement)].append({'name': rec.settlement, 'district': rec.oblast_district})
+            dict_letters[find_first_upper_char(rec.settlement)].append({'name': rec.settlement, 'district': rec.settlement})
             for main_city in config.MAIN_CITIES_LIST:
                 if main_city in rec.settlement:
-                    main_cities.append({'name': main_city, 'district': rec.oblast_district})
+                    main_cities.append({'name': main_city, 'district': main_city})
 
         letters = list()
         for k in sorted(dict_letters):
@@ -154,25 +154,25 @@ def district_list():
 def ads_data():
     page = request.json.get('page', 1)
     filter = request.json.get('filter')
-    oblast_district = "Череповецкий район"
+    settlement = None
     min_price = 0
     max_price = 0
     new_building = None
     if filter is not None:
-        oblast_district = filter.get('oblast_district')
+        settlement = filter.get('settlement')
         min_price = filter.get('min_price', 0)
         max_price = filter.get('max_price', 0)
         new_building = filter.get('new_building', None)
 
-    update_date = session.pop('update_date', None)
+    update_date = session['update_date']
 
     count_per_page = app.config['COUNT_AD_PER_PAGE']
-    ads_filter_data = Ad.query.filter(Ad.update_date == update_date,
-        or_(oblast_district is None,
-            Ad.oblast_district == oblast_district),
+    ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
+        or_(settlement is None,
+            Ad.settlement == settlement),
         or_(min_price == 0, Ad.price >= min_price),
         or_(max_price == 0, Ad.price <= max_price),
-        or_(new_building is None,
+        or_((new_building is None or new_building is False),
             or_(Ad.under_construction,
                 and_(Ad.construction_year,
                      datetime.now().year -
@@ -184,7 +184,9 @@ def ads_data():
     for row in ads_filter_data.items:
         ads.append(row.as_dict())
 
-    pages_count = ads_filter_data.total // count_per_page
+    pages_count = 1
+    if count_per_page < ads_filter_data.total:
+        pages_count = ads_filter_data.total // count_per_page + 1
 
     search_results = {
         'ads': ads,

@@ -1,42 +1,8 @@
 var ADList = React.createClass({
-    //init state
-    getInitialState: function(){
-        return{
-            ads: [],
-            filter: null,
-            page: 1
-        }
-    },
-
-    setFilters: function (filter) {
-        console.log('from AD list' + filter);
-    },
-
-    componentDidMount: function(){
-        var sendUrl = '/get_ads';
-        var request_data = {
-            'filter': this.state.filter,
-            'page': this.state.page
-        };
-        $.ajax({
-          url: sendUrl,
-          type: 'POST',
-          data: JSON.stringify(request_data),
-          contentType: 'application/json;charset=UTF-8',
-          success: function(data) {
-              this.setState({ads: data.ads});
-              console.log(data.pages_count);
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-    },
-
     render: function () {
-        var ads = this.state.ads;
+        var ads = this.props.ads;
         return(<div>
-                { ads.length === 0? <div>Жилья не найдено, измените условия поиска или обновите базу</div>:
+                { (!ads || ads.length == 0)? <div>Жилья не найдено, измените условия поиска или обновите базу</div>:
                 <ul className="list-unstyled">
                     {ads.map(function(ad){
                         return <li>
@@ -85,8 +51,8 @@ var SearchPanel = React.createClass({
             letters: [],
             min_price: null,
             max_price: null,
-            oblast_district: '',
-            new_building: true
+            settlement: '',
+            new_building: false
         }
     },
 
@@ -98,13 +64,13 @@ var SearchPanel = React.createClass({
           cache: false,
           success: function(data) {
               if(data){
-                  var default_district = (data.main_cities_map && data.main_cities_map.length > 0)?
+                  var default_settlement = (data.main_cities_map && data.main_cities_map.length > 0)?
                       data.main_cities_map[0].district
                       : (data.letters.length > 0? data.letters[0].array[0].district: "");
                 this.setState({
                     main_cities: data.main_cities_map,
                     letters: data.letters,
-                    oblast_district: default_district
+                    settlement: default_settlement
                 });
               }
           }.bind(this),
@@ -116,12 +82,13 @@ var SearchPanel = React.createClass({
 
     hanldeSubmitFilter: function () {
         var filter = {
-            'min_price': this.state.min_price,
-            'max_price': this.state.max_price,
-            'oblast_district': this.state.oblast_district,
+            'min_price': this.state.min_price? this.state.min_price : 0,
+            'max_price': this.state.max_price? this.state.max_price : 0,
+            'settlement': this.state.settlement,
             'new_building': this.state.new_building
         };
         console.log(filter);
+        this.props.callbackFilterChange(filter);
     },
 
     validateNumber: function (text) {
@@ -155,7 +122,7 @@ var SearchPanel = React.createClass({
 
     handleCitySelection: function (event) {
         var value = event.target.value;
-        this.setState({oblast_district: value});
+        this.setState({settlement: value});
     },
 
     render: function () {
@@ -164,7 +131,7 @@ var SearchPanel = React.createClass({
         return(<div className="panel-body">
                   <p>город / районный центр</p>
                   <div className="form-group">
-                    <select name="oblast_district" className="form-control" onChange={this.handleCitySelection} value={this.state.oblast_district}>
+                    <select className="form-control" onChange={this.handleCitySelection} value={this.state.settlement}>
                         {
                             main_cities.map(function(city){
                                 return <option value={city.district}>{city.name}</option>
@@ -340,7 +307,33 @@ var MainSitePanel = React.createClass({
     //init state
     getInitialState: function(){
       return {
-      };
+          ads: [],
+          pages: null,
+          selectedPage: 1
+      }
+    },
+
+    pushFilterState: function (filter) {
+        console.log('from parent' + filter);
+
+        var sendUrl = '/get_ads';
+        var request_data = {
+            'filter': filter,
+            'page': this.state.selectedPage
+        };
+        $.ajax({
+          url: sendUrl,
+          type: 'POST',
+          data: JSON.stringify(request_data),
+          contentType: 'application/json;charset=UTF-8',
+          success: function(data) {
+              this.setState({ads: data.ads});
+              console.log(data.pages_count);
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
     },
 
     render: function () {
@@ -350,7 +343,7 @@ var MainSitePanel = React.createClass({
                   <div className="row">
                     <div className="col-sm-4">
                       <form role="form" className="panel panel-default">
-                        <SearchPanel/>
+                        <SearchPanel callbackFilterChange={this.pushFilterState}/>
                       </form>
                       <form role="form" className="panel panel-default">
                         <DbSetupPanel/>
@@ -358,7 +351,7 @@ var MainSitePanel = React.createClass({
                     </div>
                     <div className="col-sm-8">
                       <div className="panel panel-default">
-                        <ADList/>
+                        <ADList ads={this.state.ads}/>
                         {/*<div className="panel-body">*/}
                           {/*<div className="clearfix">*/}
                             {/*<ul className="pagination pull-right">*/}
