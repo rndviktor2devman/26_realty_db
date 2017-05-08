@@ -2393,6 +2393,7 @@ var SearchPanel = function (_Component) {
                     console.error(this.props.url, status, err.toString());
                 }.bind(this)
             });
+            this.hanldeSubmitFilter();
         }
     }, {
         key: 'hanldeSubmitFilter',
@@ -2617,7 +2618,7 @@ var MainSitePanel = function (_Component) {
         _this.state = {
             ads: [],
             total: 0,
-            current: 1,
+            current: 0,
             visiblePages: 3,
             filter: {}
         };
@@ -2627,7 +2628,6 @@ var MainSitePanel = function (_Component) {
     _createClass(MainSitePanel, [{
         key: 'pushFilterState',
         value: function pushFilterState(filter) {
-            console.log('from parent' + filter);
             this.setState({ filter: filter });
 
             this.showFilteredPage(1);
@@ -2635,7 +2635,7 @@ var MainSitePanel = function (_Component) {
     }, {
         key: 'handlePageChanged',
         value: function handlePageChanged(newPage) {
-            console.log('requested page' + newPage);
+            newPage += 1;
             this.showFilteredPage(newPage);
         }
     }, {
@@ -2652,7 +2652,7 @@ var MainSitePanel = function (_Component) {
                 data: JSON.stringify(request_data),
                 contentType: 'application/json;charset=UTF-8',
                 success: function (data) {
-                    this.setState({ ads: data.ads, total: data.pages_count, current: pageNumber });
+                    this.setState({ ads: data.ads, total: data.pages_count, current: data.current_page });
                     console.log(data.pages_count);
                 }.bind(this),
                 error: function (xhr, status, err) {

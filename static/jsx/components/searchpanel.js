@@ -36,6 +36,7 @@ class SearchPanel extends Component{
             console.error(this.props.url, status, err.toString());
           }.bind(this)
         });
+        this.hanldeSubmitFilter();
     }
 
     hanldeSubmitFilter() {

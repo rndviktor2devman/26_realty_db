@@ -12,21 +12,20 @@ class MainSitePanel extends Component{
         this.state = {
             ads: [],
             total: 0,
-            current: 1,
+            current: 0,
             visiblePages: 3,
             filter: {}
         }
     }
 
     pushFilterState(filter) {
-        console.log('from parent' + filter);
         this.setState({filter: filter});
 
         this.showFilteredPage(1);
     }
 
     handlePageChanged(newPage){
-        console.log('requested page' + newPage);
+        newPage += 1;
         this.showFilteredPage(newPage);
     }
 
@@ -42,7 +41,7 @@ class MainSitePanel extends Component{
           data: JSON.stringify(request_data),
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
-              this.setState({ads: data.ads, total: data.pages_count, current: pageNumber});
+              this.setState({ads: data.ads, total: data.pages_count, current: data.current_page});
               console.log(data.pages_count);
           }.bind(this),
           error: function(xhr, status, err) {
@@ -72,7 +71,7 @@ class MainSitePanel extends Component{
                             <Pager total={this.state.total}
 				                   current={this.state.current}
                                    visiblePages={this.state.visiblePages}
-                                   titles={{ first: '<|', last: '>|' }}
+                                   titles={{ first: '|<', last: '>|' }}
                                    className="pagination-sm pull-right"
                                    onPageChanged={this.handlePageChanged.bind(this)}/>
                             : null}
