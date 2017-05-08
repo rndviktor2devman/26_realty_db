@@ -75,6 +75,9 @@ class DbSetupPanel extends Component{
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
               this.setState({update_message: data.update_message, update_datetime:data.update_datetime, update_error: false});
+              setTimeout(function () {
+                window.location.href = '/';
+              }, 1000);
           }.bind(this),
           error: function(xhr, status, err) {
               if(xhr.status == 400) {
@@ -88,22 +91,17 @@ class DbSetupPanel extends Component{
         });
     }
 
-    refreshPage(){
-        window.location.href = '/';
-    }
-
     render(){
         var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
         var updateError = this.state.update_error;
         var updateMessage = this.state.update_message && this.state.update_message.length > 0;
-        var updateSucceed = updateMessage && !updateError;
         var editMode = this.state.editMode;
         return(<div className="panel-body">
             <div className="form-group">
                 <label>База данных <p>{this.state.update_datetime}</p></label>
             </div>
             <div className={passError? "has-error" : "form-group"} >
-                <input name="password" className="form-control" type="password" onChange={this.handlePassword} onKeyDown={this.handleInputKeyDown.bind(this)} placeholder="Пароль от базы" value={this.state.password}/>
+                <input name="password" className="form-control" type="password" onChange={this.handlePassword.bind(this)} onKeyDown={this.handleInputKeyDown.bind(this)} placeholder="Пароль от базы" value={this.state.password}/>
                 {passError ? <span className="error-field">Некорректный пароль</span> : null}
             </div>
             <div className={updateError? "has-error" : "form-group"}>
@@ -113,12 +111,6 @@ class DbSetupPanel extends Component{
             <div className="form-group">
                 <button type="button" className="btn btn-primary" disabled={!editMode} onClick={this.updateDatabase.bind(this)}>Обновить базу</button>
             </div>
-            {updateSucceed ?
-                <div className="form-group">
-                    <button type="button" className="btn btn-primary" onClick={this.refreshPage}>Работать с новой базой</button>
-                </div>
-                : null
-            }
         </div> )
     }
 };

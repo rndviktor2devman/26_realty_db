@@ -2236,6 +2236,9 @@ var DbSetupPanel = function (_Component) {
                 contentType: 'application/json;charset=UTF-8',
                 success: function (data) {
                     this.setState({ update_message: data.update_message, update_datetime: data.update_datetime, update_error: false });
+                    setTimeout(function () {
+                        window.location.href = '/';
+                    }, 1000);
                 }.bind(this),
                 error: function (xhr, status, err) {
                     if (xhr.status == 400) {
@@ -2249,17 +2252,11 @@ var DbSetupPanel = function (_Component) {
             });
         }
     }, {
-        key: 'refreshPage',
-        value: function refreshPage() {
-            window.location.href = '/';
-        }
-    }, {
         key: 'render',
         value: function render() {
             var passError = this.state.passwordError && this.state.password && this.state.password.length > 0;
             var updateError = this.state.update_error;
             var updateMessage = this.state.update_message && this.state.update_message.length > 0;
-            var updateSucceed = updateMessage && !updateError;
             var editMode = this.state.editMode;
             return _react2.default.createElement(
                 'div',
@@ -2281,7 +2278,7 @@ var DbSetupPanel = function (_Component) {
                 _react2.default.createElement(
                     'div',
                     { className: passError ? "has-error" : "form-group" },
-                    _react2.default.createElement('input', { name: 'password', className: 'form-control', type: 'password', onChange: this.handlePassword, onKeyDown: this.handleInputKeyDown.bind(this), placeholder: '\u041F\u0430\u0440\u043E\u043B\u044C \u043E\u0442 \u0431\u0430\u0437\u044B', value: this.state.password }),
+                    _react2.default.createElement('input', { name: 'password', className: 'form-control', type: 'password', onChange: this.handlePassword.bind(this), onKeyDown: this.handleInputKeyDown.bind(this), placeholder: '\u041F\u0430\u0440\u043E\u043B\u044C \u043E\u0442 \u0431\u0430\u0437\u044B', value: this.state.password }),
                     passError ? _react2.default.createElement(
                         'span',
                         { className: 'error-field' },
@@ -2306,16 +2303,7 @@ var DbSetupPanel = function (_Component) {
                         { type: 'button', className: 'btn btn-primary', disabled: !editMode, onClick: this.updateDatabase.bind(this) },
                         '\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u0431\u0430\u0437\u0443'
                     )
-                ),
-                updateSucceed ? _react2.default.createElement(
-                    'div',
-                    { className: 'form-group' },
-                    _react2.default.createElement(
-                        'button',
-                        { type: 'button', className: 'btn btn-primary', onClick: this.refreshPage },
-                        '\u0420\u0430\u0431\u043E\u0442\u0430\u0442\u044C \u0441 \u043D\u043E\u0432\u043E\u0439 \u0431\u0430\u0437\u043E\u0439'
-                    )
-                ) : null
+                )
             );
         }
     }]);
@@ -2700,7 +2688,7 @@ var MainSitePanel = function (_Component) {
                                     pagesCount && pagesCount > 1 ? _react2.default.createElement(_reactPager2.default, { total: this.state.total,
                                         current: this.state.current,
                                         visiblePages: this.state.visiblePages,
-                                        titles: { first: '<|', last: '>|' },
+                                        titles: { first: '|<', last: '>|' },
                                         className: 'pagination-sm pull-right',
                                         onPageChanged: this.handlePageChanged.bind(this) }) : null
                                 )
