@@ -50,23 +50,28 @@ def parse_json_source(source_path):
     return json_data, source_error
 
 
+def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
+    any_value_imported = False
+    for ad_key, ad_value in ad_json_item.items():
+        if hasattr(ad_db_item, ad_key):
+            if isinstance(ad_value, str):
+                ad_value = ' '.join(ad_value.split())
+            setattr(ad_db_item, ad_key, ad_value)
+            any_value_imported = True
+    if any_value_imported:
+        setattr(ad_db_item, 'update_date', datetime_import)
+        db.session.add(ad_db_item)
+    return any_value_imported
+
+
 def import_json_to_db(new_ads):
     any_item_imported = False
     datetime_import = datetime.now().replace(microsecond=0)
     for ad in new_ads:
-        ad_item = Ad.query.filter_by(id=ad.get('id')).first()
-        if ad_item is None:
-            ad_item = Ad()
-        any_value_imported = False
-        for ad_key, ad_value in ad.items():
-            if hasattr(ad_item, ad_key):
-                if isinstance(ad_value, str):
-                    ad_value = ' '.join(ad_value.split())
-                setattr(ad_item, ad_key, ad_value)
-                any_value_imported = True
-        if any_value_imported:
-            setattr(ad_item, 'update_date', datetime_import)
-            db.session.add(ad_item)
+        ad_db_item = Ad.query.filter_by(id=ad.get('id')).first()
+        if ad_db_item is None:
+            ad_db_item = Ad()
+        if import_item_to_db(ad_db_item, ad, datetime_import):
             any_item_imported = True
     if any_item_imported:
         session['update_date'] = datetime_import
