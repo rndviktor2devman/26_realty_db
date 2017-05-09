@@ -2121,8 +2121,6 @@ var ADList = function (_Component) {
   return ADList;
 }(_react.Component);
 
-;
-
 exports.default = ADList;
 
 /***/ }),
@@ -2311,8 +2309,6 @@ var DbSetupPanel = function (_Component) {
     return DbSetupPanel;
 }(_react.Component);
 
-;
-
 exports.default = DbSetupPanel;
 
 /***/ }),
@@ -2392,7 +2388,6 @@ var SearchPanel = function (_Component) {
                 'settlement': this.state.settlement,
                 'new_building': this.state.new_building
             };
-            console.log(filter);
             this.props.callbackFilterChange(filter);
         }
     }, {
@@ -2548,8 +2543,6 @@ var SearchPanel = function (_Component) {
     return SearchPanel;
 }(_react.Component);
 
-;
-
 exports.default = SearchPanel;
 
 /***/ }),
@@ -2616,22 +2609,21 @@ var MainSitePanel = function (_Component) {
     _createClass(MainSitePanel, [{
         key: 'pushFilterState',
         value: function pushFilterState(filter) {
-            this.setState({ filter: filter });
-
-            this.showFilteredPage(1);
+            this.showFilteredPage(1, filter);
         }
     }, {
         key: 'handlePageChanged',
         value: function handlePageChanged(newPage) {
             newPage += 1;
-            this.showFilteredPage(newPage);
+            var filter = this.state.filter;
+            this.showFilteredPage(newPage, filter);
         }
     }, {
         key: 'showFilteredPage',
-        value: function showFilteredPage(pageNumber) {
+        value: function showFilteredPage(pageNumber, newFilter) {
             var sendurl = '/get_ads';
             var request_data = {
-                'filter': this.state.filter,
+                'filter': newFilter,
                 'page': pageNumber
             };
             $.ajax({
@@ -2640,8 +2632,7 @@ var MainSitePanel = function (_Component) {
                 data: JSON.stringify(request_data),
                 contentType: 'application/json;charset=UTF-8',
                 success: function (data) {
-                    this.setState({ ads: data.ads, total: data.pages_count, current: data.current_page });
-                    console.log(data.pages_count);
+                    this.setState({ ads: data.ads, total: data.pages_count, current: data.current_page, filter: newFilter });
                 }.bind(this),
                 error: function (xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -2702,8 +2693,6 @@ var MainSitePanel = function (_Component) {
 
     return MainSitePanel;
 }(_react.Component);
-
-;
 
 ReactDOM.render(_react2.default.createElement(MainSitePanel, null), document.getElementById('main_site_panel'));
 

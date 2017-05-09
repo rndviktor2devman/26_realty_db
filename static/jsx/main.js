@@ -19,20 +19,19 @@ class MainSitePanel extends Component{
     }
 
     pushFilterState(filter) {
-        this.setState({filter: filter});
-
-        this.showFilteredPage(1);
+        this.showFilteredPage(1, filter);
     }
 
     handlePageChanged(newPage){
         newPage += 1;
-        this.showFilteredPage(newPage);
+        var filter = this.state.filter;
+        this.showFilteredPage(newPage, filter);
     }
 
-    showFilteredPage(pageNumber){
+    showFilteredPage(pageNumber, newFilter){
         var sendurl = '/get_ads';
         var request_data = {
-            'filter': this.state.filter,
+            'filter': newFilter,
             'page': pageNumber
         };
         $.ajax({
@@ -41,8 +40,7 @@ class MainSitePanel extends Component{
           data: JSON.stringify(request_data),
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
-              this.setState({ads: data.ads, total: data.pages_count, current: data.current_page});
-              console.log(data.pages_count);
+              this.setState({ads: data.ads, total: data.pages_count, current: data.current_page, filter: newFilter});
           }.bind(this),
           error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
@@ -82,7 +80,7 @@ class MainSitePanel extends Component{
               </div>
         </div>);
     }
-};
+}
 
 ReactDOM.render(
     <MainSitePanel/>,

@@ -113,6 +113,6 @@ class DbSetupPanel extends Component{
             </div>
         </div> )
     }
-};
+}
 
 export default DbSetupPanel;

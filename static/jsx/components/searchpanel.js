@@ -46,7 +46,6 @@ class SearchPanel extends Component{
             'settlement': this.state.settlement,
             'new_building': this.state.new_building
         };
-        console.log(filter);
         this.props.callbackFilterChange(filter);
     }
 
@@ -137,6 +136,6 @@ class SearchPanel extends Component{
                 </div>
         )
     }
-};
+}
 
 export default SearchPanel;

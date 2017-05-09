@@ -42,7 +42,7 @@ class ADList extends Component{
             </div>
         )
     }
-};
+}
 
 
 export default ADList;
