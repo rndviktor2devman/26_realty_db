@@ -58,11 +58,11 @@ def import_json_to_db(new_ads):
         if ad_item is None:
             ad_item = Ad()
         any_value_imported = False
-        for key, value in ad.items():
-            if hasattr(ad_item, key):
-                if isinstance(value, str):
-                    value = ' '.join(value.split())
-                setattr(ad_item, key, value)
+        for ad_key, ad_value in ad.items():
+            if hasattr(ad_item, ad_key):
+                if isinstance(ad_value, str):
+                    ad_value = ' '.join(ad_value.split())
+                setattr(ad_item, ad_key, ad_value)
                 any_value_imported = True
         if any_value_imported:
             setattr(ad_item, 'update_date', datetime_import)
@@ -104,11 +104,11 @@ def update_database():
         if json_ad is not None:
             success_import, date_import = import_json_to_db(json_ad)
             if success_import:
-                data = {
+                update_status = {
                     'update_message': 'update_succeed',
                     'update_datetime': date_import
                 }
-                return jsonify(data)
+                return jsonify(update_status)
             else:
                 return bad_request('no data imported')
     else:
