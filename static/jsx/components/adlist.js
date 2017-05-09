@@ -7,7 +7,7 @@ class ADList extends Component{
                 { (!ads || ads.length == 0)? <div>Жилья не найдено, измените условия поиска или обновите базу</div>:
                 <ul className="list-unstyled">
                     {ads.map(function(ad){
-                        return <li>
+                        return <li key={ ad.settlement + ad.address }>
                             <div className="panel-body">
                                 <div className="row">
                                   <div className="col-sm-12">

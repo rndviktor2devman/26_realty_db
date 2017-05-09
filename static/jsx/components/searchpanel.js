@@ -92,16 +92,16 @@ class SearchPanel extends Component{
                     <select className="form-control" onChange={this.handleCitySelection.bind(this)} value={this.state.settlement}>
                         {
                             main_cities.map(function(city){
-                                return <option value={city.district}>{city.name}</option>
+                                return <option key={city.district} value={city.district}>{city.name}</option>
                             })
                         }
 
                         {
                             letters.map(function(letter) {
-                                return <optgroup label={letter.letter}>
+                                return <optgroup key={letter.letter} label={letter.letter}>
                                 {
                                     letter.array.map(function (city) {
-                                        return <option value={city.district}>{city.name}</option>
+                                        return <option key={city.district} value={city.district}>{city.name}</option>
                                     })
                                 }
                                 </optgroup>

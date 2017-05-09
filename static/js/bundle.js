@@ -2026,7 +2026,7 @@ var ADList = function (_Component) {
           ads.map(function (ad) {
             return _react2.default.createElement(
               "li",
-              null,
+              { key: ad.settlement + ad.address },
               _react2.default.createElement(
                 "div",
                 { className: "panel-body" },
@@ -2451,18 +2451,18 @@ var SearchPanel = function (_Component) {
                         main_cities.map(function (city) {
                             return _react2.default.createElement(
                                 'option',
-                                { value: city.district },
+                                { key: city.district, value: city.district },
                                 city.name
                             );
                         }),
                         letters.map(function (letter) {
                             return _react2.default.createElement(
                                 'optgroup',
-                                { label: letter.letter },
+                                { key: letter.letter, label: letter.letter },
                                 letter.array.map(function (city) {
                                     return _react2.default.createElement(
                                         'option',
-                                        { value: city.district },
+                                        { key: city.district, value: city.district },
                                         city.name
                                     );
                                 })

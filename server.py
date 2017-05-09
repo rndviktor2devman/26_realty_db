@@ -134,8 +134,9 @@ def district_list():
         for rec in records:
             dict_letters[find_first_upper_char(rec.settlement)].append({'name': rec.settlement, 'district': rec.settlement})
             for main_city in config.MAIN_CITIES_LIST:
-                if main_city in rec.settlement:
-                    main_cities.append({'name': main_city, 'district': main_city})
+                if rec.settlement.find(main_city) != -1:
+                    # _ms - to avoid keys collision on UI
+                    main_cities.append({'name': main_city, 'district': (rec.settlement + "_ms")})
 
         letters = list()
         for k in sorted(dict_letters):
@@ -160,7 +161,7 @@ def ads_data():
     max_price = 0
     new_building = None
     if filter is not None:
-        settlement = filter.get('settlement')
+        settlement = filter.get('settlement').replace('_ms', '')
         min_price = filter.get('min_price', 0)
         max_price = filter.get('max_price', 0)
         new_building = filter.get('new_building', None)
