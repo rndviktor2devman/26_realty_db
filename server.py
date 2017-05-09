@@ -77,7 +77,7 @@ def import_json_to_db(new_ads):
 @app.route('/check_db_pass', methods=['POST'])
 def check_database_password():
     password = request.json.get('password')
-    if password == config.password_for_update_db:
+    if password == config.PASSWORD_FOR_DB_UPDATE:
         return jsonify()
     else:
         return bad_request()
@@ -91,7 +91,7 @@ def get_database_status():
         last_update_time = stored_date.update_date
         session['update_date'] = last_update_time
     database_state = {
-        'path': config.default_db_source_path,
+        'path': config.DEFAULT_DB_SOURCE_PATH,
         'update_datetime': last_update_time
     }
     return jsonify(database_state)
@@ -99,7 +99,7 @@ def get_database_status():
 
 @app.route('/update_database', methods=['POST'])
 def update_database():
-    if request.json.get('password') == config.password_for_update_db:
+    if request.json.get('password') == config.PASSWORD_FOR_DB_UPDATE:
         json_ad, error = parse_json_source(request.json.get('path'))
         if json_ad is not None:
             success_import, date_import = import_json_to_db(json_ad)
@@ -168,7 +168,8 @@ def ads_data():
 
     update_date = session['update_date']
 
-    count_per_page = app.config['COUNT_AD_PER_PAGE']
+    count_per_page = app.config.get('COUNT_AD_PER_PAGE', 15)
+    new_building_age = app.config.get('MAX_NEW_BUILDING_AGE', 3)
     ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
         or_((settlement is None or not settlement),
             Ad.settlement == settlement),
@@ -178,7 +179,7 @@ def ads_data():
             or_(Ad.under_construction,
                 and_(Ad.construction_year,
                      datetime.now().year -
-                     Ad.construction_year <= app.config['MAX_NEW_BUILDING_AGE'])
+                     Ad.construction_year <= new_building_age)
                 )
             )).paginate(page, count_per_page, False)
 
