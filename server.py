@@ -2,15 +2,21 @@ from flask import Flask, render_template, request, jsonify, session
 from sqlalchemy.sql.expression import func
 from datetime import datetime
 from sqlalchemy import or_, and_
-from collections import defaultdict
 import json
-import config
 import re
 import requests
 import os
 
 app = Flask(__name__)
-app.config.from_object('config')
+basedir = os.path.abspath(os.path.dirname(__file__))
+base_database_uri = 'sqlite:///' + os.path.join(basedir, 'rdb.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI", base_database_uri)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+DEFAULT_DB_SOURCE_PATH = os.getenv("DEFAULT_DB_SOURCE_PATH", "https://devman.org/assets/ads.json")
+PASSWORD_FOR_DB_UPDATE = os.getenv("PASSWORD_FOR_DB_UPDATE", "123456")
+COUNT_AD_PER_PAGE = os.getenv("COUNT_AD_PER_PAGE", 7)
+MAX_NEW_BUILDING_AGE = os.getenv("MAX_NEW_BUILDING_AGE", 2)
+
 from ad_model import db, Ad
 db.create_all()
 
@@ -96,7 +102,7 @@ def get_database_status():
         last_update_time = stored_date.update_date
         session['update_date'] = last_update_time
     database_state = {
-        'path': config.DEFAULT_DB_SOURCE_PATH,
+        'path': DEFAULT_DB_SOURCE_PATH,
         'update_datetime': last_update_time
     }
     return jsonify(database_state)
@@ -104,7 +110,7 @@ def get_database_status():
 
 @app.route('/update_database', methods=['POST'])
 def update_database():
-    if request.json.get('password') == config.PASSWORD_FOR_DB_UPDATE:
+    if request.json.get('password') == PASSWORD_FOR_DB_UPDATE:
         json_ad, error = parse_json_source(request.json.get('path'))
         if json_ad is not None:
             success_import, date_import = import_json_to_db(json_ad)
@@ -130,8 +136,6 @@ def ads_list():
 
     update_date = session['update_date']
 
-    count_per_page = app.config.get('COUNT_AD_PER_PAGE', 15)
-    new_building_age = app.config.get('MAX_NEW_BUILDING_AGE', 3)
     ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
           or_((oblast_district is None or not oblast_district),
               Ad.oblast_district == oblast_district),
@@ -141,9 +145,9 @@ def ads_list():
               or_(Ad.under_construction,
                   and_(Ad.construction_year,
                        datetime.now().year -
-                       Ad.construction_year <= new_building_age)
+                       Ad.construction_year <= MAX_NEW_BUILDING_AGE)
                   )
-              )).paginate(page, count_per_page, False)
+              )).paginate(page, COUNT_AD_PER_PAGE, False)
 
     return render_template('ads_list.html', ads=ads_filter_data,
                            oblast_district=oblast_district, new_building=new_building,
