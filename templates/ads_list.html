@@ -28,13 +28,159 @@
     </nav>
 
     <div class="container">
-      <div id="main_site_panel"></div>
+      <div class="row">
+        <div class="col-md-9">
+          <div class="row">
+            <div class="col-sm-4">
+              <form role="form" class="panel panel-default" method="GET">
+                <div class="panel-body">
+                  <p>город / районный центр</p>
+                  <div class="form-group">
+                    <select name="oblast_district" class="form-control">
+                      <option value=""></option>
+                      <option value="Череповецкий район" {% if oblast_district=='Череповецкий район' %} selected="selected"{% endif %}>Череповец</option>
+                      <option value="Шекснинский район" {% if oblast_district=='Шекснинский район' %} selected="selected"{% endif %}>Шексна</option>
+                      <option value="Вологодский район" {% if oblast_district=='Вологодский район' %} selected="selected"{% endif %}>Вологда</option>
+                      <optgroup label="Б">
+                        <option value="Бабаевский район" {% if oblast_district=='Бабаевский район' %} selected="selected"{% endif %}>Бабаево</option>
+                        <option value="Бабушкинский район" {% if oblast_district=='Бабушкинский район' %} selected="selected"{% endif %}>Село имени Бабушкина</option>
+                        <option value="Белозерский район" {% if oblast_district=='Белозерский район' %} selected="selected"{% endif %}>Белозерск</option>
+                      </optgroup>
+                      <optgroup label="В">
+                        <option value="Великоустюгский район" {% if oblast_district=='Великоустюгский район' %} selected="selected"{% endif %}>Великий Устюг</option>
+                        <option value="Верховажский район" {% if oblast_district=='Верховажский район' %} selected="selected"{% endif %}>Верховажье</option>
+                        <option value="Вожегодский район" {% if oblast_district=='Вожегодский район' %} selected="selected"{% endif %}>Вожега</option>
+                        <option value="Вологодский район">Вологда</option>
+                        <option value="Вытегорский район" {% if oblast_district=='Вытегорский район' %} selected="selected"{% endif %}>Вытегра</option>
+                      </optgroup>
+                      <optgroup label="Г">
+                        <option value="Грязовецкий район" {% if oblast_district=='Грязовецкий район' %} selected="selected"{% endif %}>Грязовец</option>
+                      </optgroup>
+                      <optgroup label="К">
+                        <option value="Кадуйский район" {% if oblast_district=='Кадуйский район' %} selected="selected"{% endif %}>Кадуй</option>
+                        <option value="Кирилловский район" {% if oblast_district=='Кирилловский район' %} selected="selected"{% endif %}>Кириллов</option>
+                        <option value="Кичменгско-Городецкий район" {% if oblast_district=='Кичменгско-Городецкий район' %} selected="selected"{% endif %}>Кичменгский Городок</option>
+                      </optgroup>
+                      <optgroup label="Л">
+                        <option value="Вашкинский район" {% if oblast_district=='Вашкинский район' %} selected="selected"{% endif %}>Липин Бор</option>
+                      </optgroup>
+                      <optgroup label="Н">
+                        <option value="Никольский район" {% if oblast_district=='Никольский район' %} selected="selected"{% endif %}>Никольск</option>
+                        <option value="Нюксенский район" {% if oblast_district=='Нюксенский район' %} selected="selected"{% endif %}>Нюксеница</option>
+                      </optgroup>
+                      <optgroup label="С">
+                        <option value="Сокольский район" {% if oblast_district=='Сокольский район' %} selected="selected"{% endif %}>Сокол</option>
+                        <option value="Сямженский район" {% if oblast_district=='Сямженский район' %} selected="selected"{% endif %}>Сямжа</option>
+                      </optgroup>
+                      <optgroup label="Т">
+                        <option value="Тарногский район" {% if oblast_district=='Тарногский район' %} selected="selected"{% endif %}>Тарногский Городок</option>
+                        <option value="Тотемский район" {% if oblast_district=='Тотемский район' %} selected="selected"{% endif %}>Тотьма</option>
+                      </optgroup>
+                      <optgroup label="У">
+                        <option value="Усть-Кубинский район" {% if oblast_district=='Усть-Кубинский район' %} selected="selected"{% endif %}>Устье</option>
+                        <option value="Устюженский район" {% if oblast_district=='Устюженский район' %} selected="selected"{% endif %}>Устюжна</option>
+                      </optgroup>
+                      <optgroup label="Х">
+                        <option value="Харовский район" {% if oblast_district=='Харовский район' %} selected="selected"{% endif %}>Харовск</option>
+                      </optgroup>
+                      <optgroup label="Ч">
+                        <option value="Чагодощенский район" {% if oblast_district=='Чагодощенский район' %} selected="selected"{% endif %}>Чагода</option>
+                        <option value="Череповецкий район">Череповец</option>
+                      </optgroup>
+                      <optgroup label="Ш">
+                        <option value="Шекснинский район">Шексна</option>
+                        <option value="Междуреченский район" {% if oblast_district=='Междуреченский район' %} selected="selected"{% endif %}>Шуйское</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div class="form-group ">
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="new_building" {% if new_building %}checked="checked" {% endif %} value="True">
+                        только новостройки
+                      </label>
+                    </div>
+                  </div>
+                  <p><strong>Цена</strong></p>
+                  <div class="form-group ">
+                    <div class="input-group">
+                      <span class="input-group-addon">от</span>
+                      <input autocomplete="off" type="text" name="min_price" value="{% if min_price != 0 %}{{ min_price }}{% endif %}" class="form-control js-price-format" placeholder="любая">
+                      <span class="input-group-addon">р.</span>
+                    </div>
+                  </div>
+                  <div class="form-group ">
+                    <div class="input-group">
+                      <span class="input-group-addon">до</span>
+                      <input autocomplete="off" type="text" name="max_price" value="{% if max_price != 0 %}{{ max_price }}{% endif %}" class="form-control js-price-format" placeholder="любая">
+                      <span class="input-group-addon">р.</span>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-success">Показать</button>
+                </div>
+              </form>
+              <form role="form" class="panel panel-default">
+                <div id="db_setup_panel"></div>
+              </form>
+            </div>
+            <div class="col-sm-8">
+              <div class="panel panel-default">
+                {% if not ads or ads.total == 0 %}
+                  <div>Жилья не найдено, измените условия поиска или обновите базу</div>
+                {% else %}
+                  <ul class="list-unstyled">
+                    {% for ad in ads.items %}
+                      <li>
+                        <div class="panel-body">
+                          <div className="row">
+                            <div className="col-sm-12">
+                              <div>
+                                <div className="row">
+                                  <div className="col-sm-7">
+                                    <p><strong>Продается {{ ad.rooms_number }}-комнатная квартира</strong></p>
+                                  </div>
+                                  <div className="col-sm-5">
+                                    <p className="text-right"><strong class="nowrap">{{ ad.price }} р.</strong></p>
+                                  </div>
+                                </div>
+                                <div className="row">
+                                  <div className="col-sm-12">
+                                    <p>{{ ad.settlement }}, {{ ad.address }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-sm-12">
+                              <p>
+                                <span className="label label-success">комнат: {{ ad.rooms_number }}, </span>
+                                <span className="label label-primary">площадь: {{ ad.premise_area }} кв.м.</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+              </div>
+              <div id="pager_component"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div><!-- /.container -->
+    <script type="text/javascript">
+      window.pageState = {
+          pages_count: '{{ads.pages}}',
+          current_page: '{{ads.page}}' - 1
+      };
+    </script>
 
     <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/react.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/react-dom.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bundle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   </body>
 </html>

@@ -120,89 +120,34 @@ def update_database():
         return bad_request('password mismatch', error_type=1)
 
 
-def find_first_upper_char(str_name):
-    char = None
-    for word in list(str_name):
-        if word.isupper() and char is None:
-            char = word
-    return char
-
-
-@app.route('/get_district_list', methods=['GET'])
-def district_list():
-    records = db.session.query(Ad).group_by(Ad.settlement).all()
-    if records is not None:
-        dict_letters = defaultdict(list)
-        main_cities = list()
-        main_cities.append({'name': "", 'district': ""})
-
-        for rec in records:
-            dict_letters[find_first_upper_char(rec.settlement)].append({'name': rec.settlement, 'district': rec.settlement})
-            for main_city in config.MAIN_CITIES_LIST:
-                if rec.settlement.find(main_city) != -1:
-                    # _ms - to avoid keys collision on UI
-                    main_cities.append({'name': main_city, 'district': (rec.settlement + "_ms")})
-
-        letters = list()
-        for k in sorted(dict_letters):
-            letters.append({'letter': k, 'array': dict_letters[k]})
-
-        district_data = {
-            'main_cities_map': main_cities,
-            'letters': letters
-        }
-
-        return jsonify(district_data)
-    else:
-        return jsonify()
-
-
-@app.route('/get_ads', methods=['POST'])
-def ads_data():
-    page = request.json.get('page', 1)
-    filter = request.json.get('filter')
-    settlement = None
-    min_price = 0
-    max_price = 0
-    new_building = None
-    if filter is not None:
-        settlement = filter.get('settlement').replace('_ms', '')
-        min_price = filter.get('min_price', 0)
-        max_price = filter.get('max_price', 0)
-        new_building = filter.get('new_building', None)
+@app.route('/')
+def ads_list():
+    page = request.args.get('page', 1, type=int)
+    oblast_district = request.args.get('oblast_district')
+    min_price = request.args.get('min_price', 0, type=int)
+    max_price = request.args.get('max_price', 0, type=int)
+    new_building = request.args.get('new_building', None)
 
     update_date = session['update_date']
 
     count_per_page = app.config.get('COUNT_AD_PER_PAGE', 15)
     new_building_age = app.config.get('MAX_NEW_BUILDING_AGE', 3)
     ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
-        or_((settlement is None or not settlement),
-            Ad.settlement == settlement),
-        or_(min_price == 0, Ad.price >= min_price),
-        or_(max_price == 0, Ad.price <= max_price),
-        or_((new_building is None or new_building is False),
-            or_(Ad.under_construction,
-                and_(Ad.construction_year,
-                     datetime.now().year -
-                     Ad.construction_year <= new_building_age)
-                )
-            )).paginate(page, count_per_page, False)
+          or_((oblast_district is None or not oblast_district),
+              Ad.oblast_district == oblast_district),
+          or_(min_price == 0, Ad.price >= min_price),
+          or_(max_price == 0, Ad.price <= max_price),
+          or_((new_building is None or new_building is False),
+              or_(Ad.under_construction,
+                  and_(Ad.construction_year,
+                       datetime.now().year -
+                       Ad.construction_year <= new_building_age)
+                  )
+              )).paginate(page, count_per_page, False)
 
-    ads = list()
-    for row in ads_filter_data.items:
-        ads.append(row.as_dict())
-
-    search_results = {
-        'ads': ads,
-        'pages_count': ads_filter_data.pages,
-        'current_page': ads_filter_data.page - 1
-    }
-    return jsonify(search_results)
-
-
-@app.route('/')
-def ads_list():
-    return render_template('ads_list.html')
+    return render_template('ads_list.html', ads=ads_filter_data,
+                           oblast_district=oblast_district, new_building=new_building,
+                           min_price=min_price, max_price=max_price)
 
 if __name__ == "__main__":
     app.secret_key = "some very secret key"
