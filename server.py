@@ -88,7 +88,7 @@ def import_json_to_db(new_ads):
 @app.route('/check_db_pass', methods=['POST'])
 def check_database_password():
     password = request.json.get('password')
-    if password == config.PASSWORD_FOR_DB_UPDATE:
+    if password == PASSWORD_FOR_DB_UPDATE:
         return jsonify()
     else:
         return bad_request()

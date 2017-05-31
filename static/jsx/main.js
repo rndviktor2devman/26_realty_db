@@ -14,9 +14,8 @@ var DbSetupPanel = React.createClass({
     },
 
     componentDidMount: function () {
-        var sendurl = '/get_database_status';
         $.ajax({
-          url: sendurl,
+          url: '/get_database_status',
           dataType: 'json',
           cache: false,
           success: function(data) {
@@ -56,20 +55,18 @@ var DbSetupPanel = React.createClass({
     },
 
     handlePath: function(event){
-        var newPath = event.target.value;
-        this.setState({path: newPath});
+        this.setState({path: event.target.value});
     },
 
     updateDatabase: function(){
-        var sendurl = '/update_database';
-        var sendData = {
+        var dbUpdateData = {
             'password': this.state.password,
             'path': this.state.path
         };
         $.ajax({
-          url: sendurl,
+          url: '/update_database',
           type: 'POST',
-          data: JSON.stringify(sendData),
+          data: JSON.stringify(dbUpdateData),
           contentType: 'application/json;charset=UTF-8',
           success: function(data) {
               this.setState({update_message: data.update_message, update_datetime:data.update_datetime, update_error: false});
