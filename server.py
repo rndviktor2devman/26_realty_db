@@ -134,7 +134,9 @@ def ads_list():
     max_price = request.args.get('max_price', 0, type=int)
     new_building = request.args.get('new_building', None)
 
-    update_date = session['update_date']
+    update_date = None
+    if 'update_date' in session:
+        update_date = session['update_date']
 
     ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
           or_((oblast_district is None or not oblast_district),
@@ -152,6 +154,7 @@ def ads_list():
     return render_template('ads_list.html', ads=ads_filter_data,
                            oblast_district=oblast_district, new_building=new_building,
                            min_price=min_price, max_price=max_price)
+
 
 if __name__ == "__main__":
     app.secret_key = "some very secret key"
