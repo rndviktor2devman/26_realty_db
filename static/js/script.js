@@ -62,6 +62,30 @@ $('#submit-path').click(function(){
 });
 
 $( document ).ready(function() {
+    $('#pager_component').twbsPagination({
+        totalPages: window.pageState.pages_count,
+        startPage: window.pageState.current_page,
+        visiblePages: 5,
+        initiateStartPageClick: false,
+        onPageClick: function (event, page) {
+            $('#page-content').text('Page ' + page);
+            var url = window.location.href;
+            if(url.indexOf('?') > -1){
+                var pagePosition = url.indexOf('page');
+                if(pagePosition > -1){
+                    url = url.slice(0, pagePosition) + 'page=' + page;
+                } else {
+                    url += '&page=' + page;
+                }
+            } else{
+                url += '?page=' + page;
+            }
+            if(window.location.href != url){
+                window.location.href = url;
+            }
+        }
+    });
+
     $.ajax({
       url: '/get_database_status',
       dataType: 'json',

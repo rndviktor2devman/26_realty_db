@@ -179,7 +179,7 @@
                 {% endif %}
 
               </div>
-              <div id="pager_component"></div>
+              <ul id="pager_component" class="pagination-sm"></ul>
             </div>
           </div>
         </div>
@@ -187,16 +187,14 @@
     </div><!-- /.container -->
     <script type="text/javascript">
       window.pageState = {
-          pages_count: '{{ads.pages}}',
-          current_page: '{{ads.page}}' - 1
+          pages_count: {{ads.pages}},
+          current_page: {{ads.page}}
       };
     </script>
 
     <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap.min.js') }}"></script>
-    <!--<script src="{{ url_for('static', filename='vendor/react.min.js') }}"></script>-->
-    <!--<script src="{{ url_for('static', filename='vendor/react-dom.min.js') }}"></script>-->
-    <!--<script src="{{ url_for('static', filename='js/main.js') }}"></script>-->
+    <script src="{{ url_for('static', filename='vendor/jquery.twbsPagination.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>
