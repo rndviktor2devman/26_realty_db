@@ -6,18 +6,20 @@ import json
 import re
 import requests
 import os
+from ad_model import db, Ad
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 base_database_uri = 'sqlite:///' + os.path.join(basedir, 'rdb.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI", base_database_uri)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI",
+                                                  base_database_uri)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-DEFAULT_DB_SOURCE_PATH = os.getenv("DEFAULT_DB_SOURCE_PATH", "https://devman.org/assets/ads.json")
+DEFAULT_DB_SOURCE_PATH = os.getenv("DEFAULT_DB_SOURCE_PATH",
+                                   "https://devman.org/assets/ads.json")
 PASSWORD_FOR_DB_UPDATE = os.getenv("PASSWORD_FOR_DB_UPDATE", "123456")
 COUNT_AD_PER_PAGE = os.getenv("COUNT_AD_PER_PAGE", 7)
 MAX_NEW_BUILDING_AGE = os.getenv("MAX_NEW_BUILDING_AGE", 2)
 
-from ad_model import db, Ad
 db.create_all()
 
 
@@ -113,30 +115,37 @@ def ads_list():
     max_price = request.args.get('max_price', 0, type=int)
     new_building = request.args.get('new_building', None)
 
-    stored_date = db.session.query(Ad.update_date, func.max(Ad.update_date)).one()
+    stored_date = db.session.query(Ad.update_date,
+                                   func.max(Ad.update_date)).one()
     update_date = None
     if stored_date.update_date is not None:
         update_date = stored_date.update_date
 
-    ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
-          or_((oblast_district is None or not oblast_district),
-              Ad.oblast_district == oblast_district),
-          or_(min_price == 0, Ad.price >= min_price),
-          or_(max_price == 0, Ad.price <= max_price),
-          or_((new_building is None or new_building is False),
-              or_(Ad.under_construction,
-                  and_(Ad.construction_year,
-                       datetime.now().year -
-                       Ad.construction_year <= MAX_NEW_BUILDING_AGE)
-                  )
-              )).paginate(page, COUNT_AD_PER_PAGE, False)
+    ads_filter_data = \
+        db.session.query(Ad).filter(
+            Ad.update_date == update_date,
+            or_((oblast_district is None or not oblast_district),
+                Ad.oblast_district == oblast_district),
+            or_(min_price == 0, Ad.price >= min_price),
+            or_(max_price == 0, Ad.price <= max_price),
+            or_((new_building is None or new_building is False),
+                or_(Ad.under_construction,
+                    and_(Ad.construction_year,
+                         datetime.now().year -
+                         Ad.construction_year <= MAX_NEW_BUILDING_AGE)
+                    )
+                )).paginate(page, COUNT_AD_PER_PAGE, False)
 
     if update_date is None:
         update_date = 'not updated'
 
-    return render_template('ads_list.html', ads=ads_filter_data,
-                           oblast_district=oblast_district, new_building=new_building,
-                           min_price=min_price, max_price=max_price, update_date=update_date,
+    return render_template('ads_list.html',
+                           ads=ads_filter_data,
+                           oblast_district=oblast_district,
+                           new_building=new_building,
+                           min_price=min_price,
+                           max_price=max_price,
+                           update_date=update_date,
                            data_path=DEFAULT_DB_SOURCE_PATH)
 
 
