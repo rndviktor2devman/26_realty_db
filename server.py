@@ -21,17 +21,16 @@ from ad_model import db, Ad
 db.create_all()
 
 
-def bad_request(error_text=None, error_type=None):
+def bad_request(error_text=None, error_status=400):
     if error_text is None:
-        error_text = 'Bad request:' + request.url
+        error_text = 'Bad request: %s' % request.url
     message = {
-        'status': 400,
-        'message': error_text,
-        'error_type': error_type
+        'status': error_status,
+        'message': error_text
     }
     return app.response_class(
         response=json.dumps(message),
-        status=400,
+        status=error_status,
         mimetype='application/json'
     )
 
@@ -108,7 +107,7 @@ def update_database():
             else:
                 return bad_request('no data imported')
     else:
-        return bad_request('password mismatch', error_type=1)
+        return bad_request('password mismatch', error_status=401)
 
 
 @app.route('/')

@@ -39,22 +39,23 @@ $('#submit-path').click(function(){
       data: JSON.stringify(dbUpdateData),
       contentType: 'application/json;charset=UTF-8',
       success: function(data) {
-          setTimeout(function () {
+        if(!$('#database-status').hasClass('hidden')){
+            $('#database-status').addClass('hidden');
+        }
+        if(!$('#error-show').hasClass('hidden')){
+            $('#error-show').addClass('hidden');
+        }
+
+        setTimeout(function () {
             window.location.href = '/';
-          }, 1000);
+        }, 1000);
       }.bind(this),
       error: function(xhr, status, err) {
-          if(xhr.status == 400) {
-              if(xhr.responseJSON.error_type != 1){
-                if($('#error-show').hasClass('hidden')){
-                    $('#error-show').removeClass('hidden');
-                }
-              }else{
-                if($('#database-status').hasClass('hidden')){
-                    $('#database-status').removeClass('hidden');
-                }
-                $('#database-status').val(xhr.responseJSON.message);
-              }
+          if((xhr.status == 400 || xhr.status == 500) && $('#database-status').hasClass('hidden')) {
+            $('#database-status').removeClass('hidden');
+          }
+          if(xhr.status == 401 && $('#error-show').hasClass('hidden')){
+            $('#error-show').removeClass('hidden');
           }
       }.bind(this)
     });
