@@ -32,30 +32,30 @@ db.create_all()
 def bad_request(error_text=None, error_status=BAD_REQUEST_STATUS_CODE):
     if error_text is None:
         error_text = 'Bad request: %s' % request.url
-    message = {
+    error_message = {
         'status': error_status,
         'message': error_text
     }
     return app.response_class(
-        response=json.dumps(message),
+        response=json.dumps(error_message),
         status=error_status,
         mimetype='application/json'
     )
 
 
 def parse_json_source(source_path):
-    json_data = None
+    json_dataset = None
     source_error = None
     if re.match(r'^http[s]?://', source_path):
         http_answer = requests.get(source_path)
         if http_answer.status_code == requests.codes.ok:
-            json_data = http_answer.json()
+            json_dataset = http_answer.json()
         else:
             source_error = 'no access to server'
     else:
         source_error = 'unrecognised source'
 
-    return json_data, source_error
+    return json_dataset, source_error
 
 
 def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
@@ -72,10 +72,10 @@ def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
     return any_value_imported
 
 
-def import_json_to_db(new_ads):
+def import_json_to_db(ads_set):
     any_item_imported = False
     datetime_import = datetime.now().replace(microsecond=ZERO)
-    for ad in new_ads:
+    for ad in ads_set:
         ad_db_item = Ad.query.filter_by(id=ad.get('id')).first()
         if ad_db_item is None:
             ad_db_item = Ad()
@@ -100,8 +100,8 @@ def update_database():
     if request.json.get('password') == PASSWORD_FOR_DB_UPDATE:
         json_ad_item, error = parse_json_source(request.json.get('path'))
         if json_ad_item is not None:
-            success_import, date_import = import_json_to_db(json_ad_item)
-            if success_import:
+            import_succeed, date_import = import_json_to_db(json_ad_item)
+            if import_succeed:
                 update_status = {
                     'update_message': 'update_succeed',
                     'update_datetime': date_import
