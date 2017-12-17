@@ -44,11 +44,6 @@ def parse_json_source(source_path):
             json_data = http_answer.json()
         else:
             source_error = 'no access to server'
-    elif os.path.isfile(source_path):
-        with open(source_path) as json_file:
-            json_data = json.load(json_file)
-        if json_data is None:
-            source_error = 'cannot parse json file'
     else:
         source_error = 'unrecognised source'
 
