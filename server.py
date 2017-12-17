@@ -19,11 +19,13 @@ DEFAULT_DB_SOURCE_PATH = os.getenv("DEFAULT_DB_SOURCE_PATH",
 PASSWORD_FOR_DB_UPDATE = os.getenv("PASSWORD_FOR_DB_UPDATE", "123456")
 COUNT_AD_PER_PAGE = os.getenv("COUNT_AD_PER_PAGE", 7)
 MAX_NEW_BUILDING_AGE = os.getenv("MAX_NEW_BUILDING_AGE", 2)
+BAD_REQUEST_STATUS_CODE = 400
+FORBIDDEN_STATUS_CODE = 401
 
 db.create_all()
 
 
-def bad_request(error_text=None, error_status=400):
+def bad_request(error_text=None, error_status=BAD_REQUEST_STATUS_CODE):
     if error_text is None:
         error_text = 'Bad request: %s' % request.url
     message = {
@@ -104,7 +106,8 @@ def update_database():
             else:
                 return bad_request('no data imported')
     else:
-        return bad_request('password mismatch', error_status=401)
+        return bad_request('password mismatch',
+                           error_status=FORBIDDEN_STATUS_CODE)
 
 
 @app.route('/')
