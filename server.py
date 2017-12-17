@@ -80,7 +80,6 @@ def import_json_to_db(new_ads):
         if import_item_to_db(ad_db_item, ad, datetime_import):
             any_item_imported = True
     if any_item_imported:
-        session['update_date'] = datetime_import
         db.session.commit()
     return any_item_imported, datetime_import
 
@@ -92,20 +91,6 @@ def check_database_password():
         return jsonify()
     else:
         return bad_request()
-
-
-@app.route('/get_database_status', methods=['GET'])
-def get_database_status():
-    stored_date = db.session.query(Ad.update_date, func.max(Ad.update_date)).one()
-    last_update_time = 'not updated'
-    if stored_date.update_date is not None:
-        last_update_time = stored_date.update_date
-        session['update_date'] = last_update_time
-    database_state = {
-        'path': DEFAULT_DB_SOURCE_PATH,
-        'update_datetime': last_update_time
-    }
-    return jsonify(database_state)
 
 
 @app.route('/update_database', methods=['POST'])
@@ -134,9 +119,10 @@ def ads_list():
     max_price = request.args.get('max_price', 0, type=int)
     new_building = request.args.get('new_building', None)
 
+    stored_date = db.session.query(Ad.update_date, func.max(Ad.update_date)).one()
     update_date = None
-    if 'update_date' in session:
-        update_date = session['update_date']
+    if stored_date.update_date is not None:
+        update_date = stored_date.update_date
 
     ads_filter_data = db.session.query(Ad).filter(Ad.update_date == update_date,
           or_((oblast_district is None or not oblast_district),
@@ -151,9 +137,13 @@ def ads_list():
                   )
               )).paginate(page, COUNT_AD_PER_PAGE, False)
 
+    if update_date is None:
+        update_date = 'not updated'
+
     return render_template('ads_list.html', ads=ads_filter_data,
                            oblast_district=oblast_district, new_building=new_building,
-                           min_price=min_price, max_price=max_price)
+                           min_price=min_price, max_price=max_price, update_date=update_date,
+                           data_path=DEFAULT_DB_SOURCE_PATH)
 
 
 if __name__ == "__main__":

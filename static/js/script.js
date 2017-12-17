@@ -86,18 +86,4 @@ $( document ).ready(function() {
             }
         });
     }
-
-
-    $.ajax({
-      url: '/get_database_status',
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        $('#update-date-show').text(data.update_datetime);
-        $('#input-path').val(data.path);
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
 });
