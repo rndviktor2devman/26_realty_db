@@ -17,10 +17,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 DEFAULT_DB_SOURCE_PATH = os.getenv("DEFAULT_DB_SOURCE_PATH",
                                    "https://devman.org/assets/ads.json")
 PASSWORD_FOR_DB_UPDATE = os.getenv("PASSWORD_FOR_DB_UPDATE", "123456")
-COUNT_AD_PER_PAGE = os.getenv("COUNT_AD_PER_PAGE", 7)
-MAX_NEW_BUILDING_AGE = os.getenv("MAX_NEW_BUILDING_AGE", 2)
+AVERAGE_PAGE = 7
+DEFAULT_BUILDING_AGE = 2
+COUNT_AD_PER_PAGE = os.getenv("COUNT_AD_PER_PAGE", AVERAGE_PAGE)
+MAX_NEW_BUILDING_AGE = os.getenv("MAX_NEW_BUILDING_AGE", DEFAULT_BUILDING_AGE)
 BAD_REQUEST_STATUS_CODE = 400
 FORBIDDEN_STATUS_CODE = 401
+FIRST_PAGE = 1
+ZERO = 0
 
 db.create_all()
 
@@ -70,7 +74,7 @@ def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
 
 def import_json_to_db(new_ads):
     any_item_imported = False
-    datetime_import = datetime.now().replace(microsecond=0)
+    datetime_import = datetime.now().replace(microsecond=ZERO)
     for ad in new_ads:
         ad_db_item = Ad.query.filter_by(id=ad.get('id')).first()
         if ad_db_item is None:
@@ -112,10 +116,10 @@ def update_database():
 
 @app.route('/')
 def ads_list():
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get('page', FIRST_PAGE, type=int)
     district = request.args.get('oblast_district')
-    min_price = request.args.get('min_price', 0, type=int)
-    max_price = request.args.get('max_price', 0, type=int)
+    min_price = request.args.get('min_price', ZERO, type=int)
+    max_price = request.args.get('max_price', ZERO, type=int)
     new_building = request.args.get('new_building', None)
 
     stored_date = db.session.query(Ad.update_date,
@@ -129,8 +133,8 @@ def ads_list():
             Ad.update_date == update_date,
             or_((district is None or not district),
                 Ad.oblast_district == district),
-            or_(min_price == 0, Ad.price >= min_price),
-            or_(max_price == 0, Ad.price <= max_price),
+            or_(min_price == ZERO, Ad.price >= min_price),
+            or_(max_price == ZERO, Ad.price <= max_price),
             or_((new_building is None or new_building is False),
                 or_(Ad.under_construction,
                     and_(Ad.construction_year,
