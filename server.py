@@ -94,9 +94,9 @@ def check_database_password():
 @app.route('/update_database', methods=['POST'])
 def update_database():
     if request.json.get('password') == PASSWORD_FOR_DB_UPDATE:
-        json_ad, error = parse_json_source(request.json.get('path'))
-        if json_ad is not None:
-            success_import, date_import = import_json_to_db(json_ad)
+        json_ad_item, error = parse_json_source(request.json.get('path'))
+        if json_ad_item is not None:
+            success_import, date_import = import_json_to_db(json_ad_item)
             if success_import:
                 update_status = {
                     'update_message': 'update_succeed',
@@ -113,7 +113,7 @@ def update_database():
 @app.route('/')
 def ads_list():
     page = request.args.get('page', 1, type=int)
-    oblast_district = request.args.get('oblast_district')
+    district = request.args.get('oblast_district')
     min_price = request.args.get('min_price', 0, type=int)
     max_price = request.args.get('max_price', 0, type=int)
     new_building = request.args.get('new_building', None)
@@ -127,8 +127,8 @@ def ads_list():
     ads_filter_data = \
         db.session.query(Ad).filter(
             Ad.update_date == update_date,
-            or_((oblast_district is None or not oblast_district),
-                Ad.oblast_district == oblast_district),
+            or_((district is None or not district),
+                Ad.oblast_district == district),
             or_(min_price == 0, Ad.price >= min_price),
             or_(max_price == 0, Ad.price <= max_price),
             or_((new_building is None or new_building is False),
@@ -144,7 +144,7 @@ def ads_list():
 
     return render_template('ads_list.html',
                            ads=ads_filter_data,
-                           oblast_district=oblast_district,
+                           oblast_district=district,
                            new_building=new_building,
                            min_price=min_price,
                            max_price=max_price,
