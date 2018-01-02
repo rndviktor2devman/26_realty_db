@@ -24,6 +24,7 @@ python3 server.py
 ```
 By [link](http://localhost:5000/) will be available site. 
 You have to import data to database. To do it enter password to the 'База данных' section and hit 'enter'.
-Default password is '123456' and it's stored in with env variable 'PASSWORD_FOR_DB_UPDATE'
+Default password is '123456' and it's stored in with env variable 'PASSWORD_FOR_DB_UPDATE'. The data can be retrieved 
+by 'json_dumper.py' script - it dumps the set of flats data into 'flats_{run_datetime}.json' file. 
 
 Then you'll be able to import data into your database(most obvious way - leave defaults and hit 'Обновить базу')
