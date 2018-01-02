@@ -6,11 +6,7 @@ import json
 import os
 
 app = Flask(__name__)
-
-try:
-    from ad_model import db, Ad
-except:
-    raise
+from ad_model import db, Ad
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 base_database_uri = 'sqlite:///' + os.path.join(basedir, 'rdb.db')
