@@ -3,12 +3,15 @@ from sqlalchemy.sql.expression import func
 from datetime import datetime
 from sqlalchemy import or_, and_
 import json
-import re
-import requests
 import os
-from ad_model import db, Ad
 
 app = Flask(__name__)
+
+try:
+    from ad_model import db, Ad
+except:
+    raise
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 base_database_uri = 'sqlite:///' + os.path.join(basedir, 'rdb.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI",
@@ -41,21 +44,6 @@ def bad_request(error_text=None, error_status=BAD_REQUEST_STATUS_CODE):
         status=error_status,
         mimetype='application/json'
     )
-
-
-def parse_json_source(source_path):
-    json_dataset = None
-    source_error = None
-    if re.match(r'^http[s]?://', source_path):
-        http_answer = requests.get(source_path)
-        if http_answer.status_code == requests.codes.ok:
-            json_dataset = http_answer.json()
-        else:
-            source_error = 'no access to server'
-    else:
-        source_error = 'unrecognised source'
-
-    return json_dataset, source_error
 
 
 def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
@@ -98,7 +86,7 @@ def check_database_password():
 @app.route('/update_database', methods=['POST'])
 def update_database():
     if request.json.get('password') == PASSWORD_FOR_DB_UPDATE:
-        json_ad_item, error = parse_json_source(request.json.get('path'))
+        json_ad_item = json.loads(request.json.get('flats-data'))
         if json_ad_item is not None:
             import_succeed, date_import = import_json_to_db(json_ad_item)
             if import_succeed:
@@ -122,6 +110,7 @@ def ads_list():
     max_price = request.args.get('max_price', ZERO, type=int)
     new_building = request.args.get('new_building', None)
 
+    # filter data only with the last import date
     stored_date = db.session.query(Ad.update_date,
                                    func.max(Ad.update_date)).one()
     update_date = None
@@ -153,7 +142,7 @@ def ads_list():
                            min_price=min_price,
                            max_price=max_price,
                            update_date=update_date,
-                           data_path=DEFAULT_DB_SOURCE_PATH)
+                           data_path='')
 
 
 if __name__ == "__main__":

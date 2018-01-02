@@ -31,7 +31,7 @@ $('#passhandle').on('keypress', function (e) {
 $('#submit-path').click(function(){
     var dbUpdateData = {
         'password': $("#passhandle").val(),
-        'path': $('#input-path').val()
+        'flats-data': $('#input-path').val()
     };
     $.ajax({
       url: '/update_database',

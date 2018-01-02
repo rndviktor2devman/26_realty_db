@@ -8,3 +8,4 @@ node_modules/
 gulpfile.js
 project
 /static/bower_components/
+flats_*
