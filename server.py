@@ -51,6 +51,7 @@ def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
             setattr(ad_db_item, ad_key, ad_value)
             any_value_imported = True
     if any_value_imported:
+        # update date - key for search last items!
         setattr(ad_db_item, 'update_date', datetime_import)
         db.session.add(ad_db_item)
     return any_value_imported
@@ -106,6 +107,7 @@ def ads_list():
     max_price = request.args.get('max_price', ZERO, type=int)
     new_building = request.args.get('new_building', None)
 
+    # update date - key for search last items!
     # filter data only with the last import date
     stored_date = db.session.query(Ad.update_date,
                                    func.max(Ad.update_date)).one()
