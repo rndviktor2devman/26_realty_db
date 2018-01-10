@@ -42,6 +42,12 @@ def bad_request(error_text=None, error_status=BAD_REQUEST_STATUS_CODE):
     )
 
 
+def deactivate_old_items(new_ad_ids):
+    deactivate_items = Ad.query.filter(Ad.id.notin_(new_ad_ids))
+    for item in deactivate_items:
+        item.is_active = False
+
+
 def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
     any_value_imported = False
     for ad_key, ad_value in ad_json_item.items():
@@ -51,8 +57,8 @@ def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
             setattr(ad_db_item, ad_key, ad_value)
             any_value_imported = True
     if any_value_imported:
-        # update date - key for search last items!
         setattr(ad_db_item, 'update_date', datetime_import)
+        setattr(ad_db_item, 'is_active', True)
         db.session.add(ad_db_item)
     return any_value_imported
 
@@ -60,6 +66,7 @@ def import_item_to_db(ad_db_item, ad_json_item, datetime_import):
 def import_json_to_db(ads_set):
     any_item_imported = False
     datetime_import = datetime.now().replace(microsecond=ZERO)
+    deactivate_old_items([ad.get('id', None) for ad in ads_set])
     for ad in ads_set:
         ad_db_item = Ad.query.filter_by(id=ad.get('id')).first()
         if ad_db_item is None:
@@ -107,8 +114,6 @@ def ads_list():
     max_price = request.args.get('max_price', ZERO, type=int)
     new_building = request.args.get('new_building', None)
 
-    # update date - key for search last items!
-    # filter data only with the last import date
     stored_date = db.session.query(Ad.update_date,
                                    func.max(Ad.update_date)).one()
     update_date = None
@@ -117,7 +122,7 @@ def ads_list():
 
     ads_filter_data = \
         db.session.query(Ad).filter(
-            Ad.update_date == update_date,
+            Ad.is_active,
             or_((district is None or not district),
                 Ad.oblast_district == district),
             or_(min_price == ZERO, Ad.price >= min_price),

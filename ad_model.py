@@ -19,6 +19,7 @@ class Ad(db.Model):
     premise_area = db.Column(db.Float)
     new_building = db.Column(db.Boolean, default=False)
     update_date = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
